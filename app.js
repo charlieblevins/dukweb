@@ -5,8 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-
 var app = express();
 
 // Db configuration
@@ -21,13 +19,6 @@ db.once('open', function () {
   console.log('connected to database');
 });
 
-// Configure passport
-var passport = require('passport');
-var expressSession = require('express-session');
-app.use(expressSession({secret: 'bob the basset'}));
-app.use(passport.initalize());
-app.use(passport.session());
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -40,6 +31,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Configure passport and session
+var passport = require('passport');
+var session = require('express-session');
+app.use(session({
+    secret: 'bob the basset',
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+var flash = require('connect-flash');
+app.use(flash());
+
+// Initialize Passport
+var initPassport = require('./passport/init');
+initPassport(passport);
+
+// Allow index router to handle all incoming requests
+var routes = require('./routes/index')(passport);
 app.use('/', routes);
 
 // catch 404 and forward to error handler
