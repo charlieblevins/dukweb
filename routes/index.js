@@ -2,9 +2,11 @@ var express = require('express');
 var router = express.Router();
 
 var isAuthenticated = function (req, res, next) {
+    console.log('isAuth: ' + req.isAuthenticated());
     if (req.isAuthenticated())
         return next();
 
+    console.log('root redirect...');
     res.redirect('/');
 }
 
@@ -36,6 +38,10 @@ module.exports = function (passport) {
 
     /* GET Home Page */
     router.get('/home', isAuthenticated, function (req, res) {
+        res.render('home', { user: req.user });
+    });
+
+    router.get('/signout', function(req, res) {
         req.logout();
         res.redirect('/');
     });

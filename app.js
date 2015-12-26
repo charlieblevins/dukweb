@@ -7,6 +7,9 @@ var bodyParser = require('body-parser');
 
 var app = express();
 
+// Configure locals
+app.locals.moment = require('moment');
+
 // Db configuration
 var dbConfig = require('./db.js');
 var mongoose = require('mongoose');

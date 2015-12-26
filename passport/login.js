@@ -9,7 +9,7 @@ module.exports = function (passport) {
     }, 
     function (req, username, password, done) {
         // check in mongo if a user with username exists or not
-        User.fineOne({'username': username},
+        User.findOne({'username': username},
             function (err, user) {
                 // In case of any  error, return using the done method
                 if (err) 
@@ -23,12 +23,13 @@ module.exports = function (passport) {
 
                 // User exists but wrong password, log the error
                 if (!isValidPassword(user, password)) {
-                    console.log('Inavlid password');
-                    return done(null, false, req.flqash('message', 'Invalid password')); // redirect back to login page
+                    console.log('Invalid password');
+                    return done(null, false, req.flash('message', 'Invalid password')); // redirect back to login page
                 }
 
                 // User and password both match, return user form done method
                 // which will be treated like success
+                console.log('success! user: ' + user);
                 return done(null, user);
             }
         );
