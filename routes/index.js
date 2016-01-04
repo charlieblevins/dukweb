@@ -1,6 +1,21 @@
 var express = require('express');
 var router = express.Router();
 var marker_api = require('../marker-api.js');
+var multer = require('multer');
+
+// Configure photo uploads
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'photos/');
+    },
+    filename: function (req, file, cb) { 
+        var fullName = req.body.latitude;
+        fullName += '_' + req.body.longitude;
+        fullName += '_' + Date.now() + '.jpg';
+        cb(null, fullName);
+    }
+});
+var upload = multer({ storage: storage });
 
 var isAuthenticated = function (req, res, next) {
     console.log('isAuth: ' + req.isAuthenticated());
@@ -48,7 +63,7 @@ module.exports = function (passport) {
     });
 
     /* ALL API Requests */
-    router.post('/api/markers', function (req, res) {
+    router.post('/api/markers', upload.single('photo'), function (req, res) {
         marker_api.addMarker(req, res);
     });
 

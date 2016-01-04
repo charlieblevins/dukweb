@@ -9,7 +9,7 @@ module.exports = {
         marker.latitude = req.body.latitude;
         marker.longitude = req.body.longitude;
         marker.tags = req.body.tags;
-        console.log(req.body);
+        marker.photo_file = req.file.filename;
 
         // save the marker 
         marker.save(function(err) {
