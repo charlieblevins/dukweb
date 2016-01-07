@@ -16,6 +16,7 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({ storage: storage });
+var getFields = multer().fields();
 
 var isAuthenticated = function (req, res, next) {
     console.log('isAuth: ' + req.isAuthenticated());
@@ -54,6 +55,7 @@ module.exports = function (passport) {
 
     /* GET Home Page */
     router.get('/home', isAuthenticated, function (req, res) {
+        console.log(req);
         res.render('home', { user: req.user });
     });
 
@@ -63,6 +65,13 @@ module.exports = function (passport) {
     });
 
     /* ALL API Requests */
+    router.all('/api/*',
+        passport.authenticate('basic', { session : false }),
+        function (req, res, next) {
+            next();
+        }
+    );
+    
     router.post('/api/markers', upload.single('photo'), function (req, res) {
         marker_api.addMarker(req, res);
     });
