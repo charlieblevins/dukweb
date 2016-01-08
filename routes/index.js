@@ -6,7 +6,7 @@ var multer = require('multer');
 // Configure photo uploads
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'photos/');
+        cb(null, __dirname + '/../public/photos/');
     },
     filename: function (req, file, cb) { 
         var fullName = req.body.latitude;
@@ -28,6 +28,9 @@ var isAuthenticated = function (req, res, next) {
 }
 
 module.exports = function (passport) {
+
+    // Http basic auth handler
+    var isBasicAuth = passport.authenticate('basic', { session : false });
 
     /* GET home page. */
     router.get('/', function(req, res, next) {
@@ -63,18 +66,13 @@ module.exports = function (passport) {
         req.logout();
         res.redirect('/');
     });
-
-    /* ALL API Requests */
-    router.all('/api/*',
-        passport.authenticate('basic', { session : false }),
-        function (req, res, next) {
-            next();
-        }
-    );
     
-    router.post('/api/markers', upload.single('photo'), function (req, res) {
-        marker_api.addMarker(req, res);
-    });
+    // Marker Api Requests
+    router.route('/api/markers')
+        .post(isBasicAuth, upload.single('photo'), marker_api.addMarker);
+
+    router.route('/api/markers/:marker_id')
+        .get(marker_api.getMarker)
 
     return router;    
 }

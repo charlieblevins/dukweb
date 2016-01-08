@@ -9,6 +9,14 @@ module.exports = {
         marker.latitude = req.body.latitude;
         marker.longitude = req.body.longitude;
         marker.tags = req.body.tags;
+
+        // Image file is required
+        if (!req.file) {
+            var message = 'No image file detected. Image is required';
+            console.log(message);
+            return res.json({message: message});
+        }
+
         marker.photo_file = req.file.filename;
 
         // save the marker 
@@ -34,6 +42,21 @@ module.exports = {
 
     deleteMarker: function (req, res) {
 
+    },
+
+    getMarker: function (req, res) {
+        console.log('Get marker id: ' + req.params.marker_id);
+
+        Marker.findOne({'_id': req.params.marker_id}, function (err, marker) {
+            if (err)
+                return console.log(err);
+
+            console.log('found marker:');
+            res.json({
+                message: 'found marker',
+                data: marker
+            });
+        });
     },
 
     getMarkers: function (req, res) {
