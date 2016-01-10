@@ -58,7 +58,6 @@ module.exports = function (passport) {
 
     /* GET Home Page */
     router.get('/home', isAuthenticated, function (req, res) {
-        console.log(req);
         res.render('home', { user: req.user });
     });
 
@@ -71,8 +70,10 @@ module.exports = function (passport) {
     router.route('/api/markers')
         .post(isBasicAuth, upload.single('photo'), marker_api.addMarker);
 
-    router.route('/api/markers/:marker_id')
-        .get(marker_api.getMarker)
+    router.route('/api/markers/')
+        .get(isBasicAuth, marker_api.getMarker)
+        .put(isBasicAuth, marker_api.editMarker)
+        .delete(isBasicAuth, marker_api.deleteMarker)
 
     return router;    
 }
