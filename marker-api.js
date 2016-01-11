@@ -3,6 +3,7 @@
 
 var Marker = require('./models/marker.js');
 var _ = require("underscore");
+var fs = require('fs');
 
 module.exports = {
     addMarker: function (req, res) {
@@ -14,9 +15,6 @@ module.exports = {
         marker.longitude = req.body.longitude;
         marker.tags = req.body.tags;
         marker.user_id = req.user._id;
-
-        // Find user id
-        console.log(req);
 
         // Image file is required
         if (!req.file) {
@@ -37,9 +35,8 @@ module.exports = {
             console.log('Marker save successful');
 
             // Build return data
-            returnData = marker;
-            delete returnData.user_id;
-            delete returnData.__v;
+            returnData = marker.toObject();
+            returnData = _.omit(returnData, 'user_id', '__v');
 
             res.status(201).json({ 
                 message: 'New marker save successful',
@@ -67,7 +64,6 @@ module.exports = {
             // Build return data
             returnData = marker.toObject();
             returnData = _.omit(returnData, 'user_id', '__v');
-            console.log(returnData);
 
             res.json({
                 message: 'found marker',
@@ -119,7 +115,38 @@ module.exports = {
     },
 
     deleteMarker: function (req, res) {
+        // No id received 
+        if (!req.query.marker_id) {
+            res.status(422).json({reason: 'No id received. Deletion is only possible with an id'});
+        }
 
+        console.log('find one');
+        Marker.findOne({'_id': req.query.marker_id}, function (err, marker) { 
+            if (err)
+                return res.status(500).json({reason: 'Internal server error'});
+
+            if (!marker)
+                return res.status(404).json({reason: 'No marker was found with id ' + req.query.marker_id});
+
+            // Make sure user is authorized to edit/delete this marker
+            if (!marker.user_id.equals(req.user._id)) {
+                return res.status(403).json({message: 'You are not authorized to view this marker'});
+            }
+
+            // Delete from db
+            marker.remove();
+            console.log('test');
+
+            // Delete photo file
+            fs.unlink(__dirname + '/public/photos/' + marker.photo_file, function (err) {
+                if (err) {
+                    console.log('error deleting ' + __dirname + '/../public/photos/' + marker.photo_file);
+                    return res.status(500).json({reason: 'Internal server error'});
+                }
+
+                return res.status(200).json({message: 'Delete marker width id ' + marker._id + ' successful'});
+            });
+        });
     },
 
     getMarkers: function (req, res) {
