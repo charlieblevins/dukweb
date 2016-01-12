@@ -11,8 +11,15 @@ module.exports = {
             returnData,
             message;
 
-        marker.latitude = req.body.latitude;
-        marker.longitude = req.body.longitude;
+        //marker.latitude = req.body.latitude;
+        //marker.longitude = req.body.longitude;
+        var lat = parseFloat(req.body.latitude);
+        var lng = parseFloat(req.body.longitude);
+        console.log(lat);
+        marker.geometry = {
+            "type": "Point",
+            "coordinates": [lng, lat]
+        };
         marker.tags = req.body.tags;
         marker.user_id = req.user._id;
 
