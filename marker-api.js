@@ -156,7 +156,60 @@ module.exports = {
         });
     },
 
-    getMarkers: function (req, res) {
+    getMarkersWithin: function (req, res) {
 
+        // Parse requested coords
+        var bottom_left = [
+            parseFloat(req.query.bottom_left_lng),
+            parseFloat(req.query.bottom_left_lat)
+        ];
+
+        var upper_right = [
+            parseFloat(req.query.upper_right_lng),
+            parseFloat(req.query.upper_right_lat)
+        ];
+
+        
+        // Mongo query
+        Marker.find({
+            geometry: {
+                $geoWithin: {
+                    $box: [
+                        bottom_left,
+                        upper_right
+                    ]
+                }
+            }
+        }, function (err, markers) {
+
+            // Handle results
+            if (err)
+                return res.status(500).json({message: myMongoErrs.get(err.code)});
+
+            if (!markers)
+                return res.status(404).json({reason: 'No markers were found.'});
+
+            // Build return data (remove private data)
+            returnData = markers.map(function (marker) {
+                var mo = marker.toObject();
+                return _.omit(mo, 'user_id', '__v');
+            });
+
+            res.json({
+                message: 'Markers found: ' + markers.length,
+                data: returnData
+            });
+        });
+    }
+}
+
+var myMongoErrs = {
+
+    get: function (num) {
+        return myMongoErrs.errsByCode[String(num)];
+    },
+
+    errsByCode: {
+        "17287": "There is a problem with your coordinates. Please make sure all four coordinates are valid floating point numbers"
     }
 }
