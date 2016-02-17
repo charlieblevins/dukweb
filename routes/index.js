@@ -50,6 +50,14 @@ module.exports = function (passport) {
         req.logout();
         res.redirect('/');
     });
+
+    // Auth Check API (Check if username/password are valid)
+    router.route('/api/authCheck')
+        .get(isBasicAuth, function (req, res) {
+            res.status(200).json({
+                message: 'Login credentials valid'
+            });
+        }); 
     
     // Marker Api Requests
     router.route('/api/markers')
