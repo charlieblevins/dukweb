@@ -1,9 +1,28 @@
 // Each function returns data to be 
 // parsed to json and sent to requestor
 
-var Marker = require('./models/marker.js');
-var _ = require("underscore");
-var fs = require('fs');
+var Marker = require('./models/marker.js'),
+    _ = require("underscore"),
+    fs = require('fs'),
+    formidable = require('formidable'),
+    crypto = require('crypto');
+
+// Configure photo uploads
+/*
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, __dirname + '/../public/photos/');
+    },
+    filename: function (req, file, cb) { 
+        var fullName = req.body.latitude;
+        fullName += '_' + req.body.longitude;
+        fullName += '_' + Date.now() + '.jpg';
+        cb(null, fullName);
+    }
+});
+var upload = multer({ storage: storage });
+var getFields = multer().fields();
+*/
 
 module.exports = {
     addMarker: function (req, res) {
@@ -11,6 +30,27 @@ module.exports = {
             returnData,
             message;
 
+        // Parse form data
+        var form = new formidable.IncomingForm();
+        form.uploadDir = __dirname + '/public/photos/';
+
+        form.parse(req, function (err, fields, files) {
+            console.log('fields:');
+            console.log(fields);
+            console.log('files:');
+            console.log(files);
+
+            // Create unique string
+            var fullName = fields.latitude;
+            fullName += '_' + fields.longitude;
+            fullName += '_' + Date.now();
+
+            // Make hash
+            var hash = crypto.createHash('md5').update(fullName).digest('hex');
+            fs.rename(files.photo.path, form.uploadDir + '/' + hash + '.jpg');
+        });
+
+        return res.status(400);
         //marker.latitude = req.body.latitude;
         //marker.longitude = req.body.longitude;
         var lat = parseFloat(req.body.latitude);
