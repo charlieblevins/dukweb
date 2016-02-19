@@ -7,87 +7,105 @@ var Marker = require('./models/marker.js'),
     formidable = require('formidable'),
     crypto = require('crypto');
 
-// Configure photo uploads
-/*
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, __dirname + '/../public/photos/');
-    },
-    filename: function (req, file, cb) { 
-        var fullName = req.body.latitude;
-        fullName += '_' + req.body.longitude;
-        fullName += '_' + Date.now() + '.jpg';
-        cb(null, fullName);
-    }
-});
-var upload = multer({ storage: storage });
-var getFields = multer().fields();
-*/
 
 module.exports = {
     addMarker: function (req, res) {
         var marker = new Marker(),
             returnData,
-            message;
+            message,
+            unique_img_hash;
 
         // Parse form data
         var form = new formidable.IncomingForm();
         form.uploadDir = __dirname + '/public/photos/';
 
-        form.parse(req, function (err, fields, files) {
-            console.log('fields:');
-            console.log(fields);
-            console.log('files:');
-            console.log(files);
+        // Create md5 of image as it streams in
+        form.onPart = function (part) {
+            if (part.name === 'photo') {
+                console.log(part);
+                var hash = crypto.createHash('md5');
+                part.addListener('data', function (chunk) {
+                    hash.update(chunk, 'utf-8');
+                    console.log(chunk);
+                });
 
-            // Create unique string
-            var fullName = fields.latitude;
-            fullName += '_' + fields.longitude;
-            fullName += '_' + Date.now();
-
-            // Make hash
-            var hash = crypto.createHash('md5').update(fullName).digest('hex');
-            fs.rename(files.photo.path, form.uploadDir + '/' + hash + '.jpg');
-        });
-
-        return res.status(400);
-        //marker.latitude = req.body.latitude;
-        //marker.longitude = req.body.longitude;
-        var lat = parseFloat(req.body.latitude);
-        var lng = parseFloat(req.body.longitude);
-        console.log(lat);
-        marker.geometry = {
-            "type": "Point",
-            "coordinates": [lng, lat]
-        };
-        marker.tags = req.body.tags;
-        marker.user_id = req.user._id;
-
-        // Image file is required
-        if (!req.file) {
-            message = 'No image file detected. Image is required';
-            console.log(message);
-            return res.status(422).json({reason: message});
+                part.addListener('end', function () {
+                    unique_img_hash = hash.digest('hex');
+                    console.log('unique_img_hash: ' + unique_img_hash);
+                });
+            }
         }
 
-        marker.photo_file = req.file.filename;
+        form.parse(req, function (err, fields, files) {
+            console.log('form parse');
 
-        // save the marker 
-        marker.save(function(err) {
-            if (err) {
-                console.log('Error in saving marker: ' + err);
-                return res.status(500).json({reason: 'An internal error occurred'});
+            // Image file is required
+            if (!files.photo) {
+                message = 'No image file detected. Image is required';
+                console.log(message);
+                return res.status(422).json({reason: message});
             }
 
-            console.log('Marker save successful');
+            // Coords are required
+            if (!fields.latitude || !fields.longitude) {
+                message = 'Coordinates missing or invalid.';
+                console.log(message);
+                return res.status(422).json({reason: message});
+            }
 
-            // Build return data
-            returnData = marker.toObject();
-            returnData = _.omit(returnData, 'user_id', '__v');
+            // Format coords for geometry storage
+            var lat = parseFloat(fields.latitude);
+            var lng = parseFloat(fields.longitude);
+            marker.geometry = {
+                "type": "Point",
+                "coordinates": [lng, lat]
+            };
 
-            res.status(201).json({ 
-                message: 'New marker save successful',
-                data: returnData
+            // Tags required
+            if (!fields.tags) {
+                message = 'Tags missing or invalid.';
+                console.log(message);
+                return res.status(422).json({reason: message});
+            }
+
+            // Tags, userid
+            marker.tags = fields.tags;
+            marker.user_id = req.user._id;
+
+            // Create unique string from lat, lng, username, timstamp
+            var fullName = fields.latitude;
+            fullName += '_' + fields.longitude;
+            fullName += '_' + req.user.username;
+            fullName += '_' + Date.now();
+            console.log('FULLNAME: ' + fullName);
+
+            // Make hash and rename file
+            var hash = crypto.createHash('md5').update(fullName).digest('hex');
+            fs.rename(files.photo.path, form.uploadDir + '/' + hash + '.jpg');
+
+            marker.photo_file = hash + '.jpg';
+
+            // save the marker 
+            marker.save(function(err) {
+                if (err) {
+                    console.log('Error in saving marker: ' + err);
+
+                    console.log('err code: ' + err.code);
+                    if (err.code === 16755) {
+                        return res.status(500).json({reason: 'Latitude and longitude are not geographically valid.'});
+                    } else {
+                        return res.status(500).json({reason: 'An internal error occurred'});
+                    }
+                }
+
+                // Build return data
+                returnData = marker.toObject();
+                returnData = _.omit(returnData, 'user_id', '__v');
+
+                res.status(201).json({ 
+                    message: 'New marker save successful',
+                    data: returnData
+                });
             });
         });
 
