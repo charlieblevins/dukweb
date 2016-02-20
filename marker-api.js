@@ -91,7 +91,16 @@ function save_new_marker (data_array) {
     marker = new Marker();
 
     // Validate marker data
-    if (!validate_marker_post(fields, file, res)) return false;
+    if (!validate_marker_post(fields, file, res)) {
+
+        // Delete file
+        if (file && file.photo) {
+            console.log('delete file: ' + file.photo.path);
+            fs.unlink(file.photo.path);
+        }
+
+        return false;
+    }
 
     // Format coords for geometry storage
     lat = parseFloat(fields.latitude);
