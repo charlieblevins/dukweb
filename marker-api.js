@@ -5,9 +5,147 @@ var Marker = require('./models/marker.js'),
     _ = require("underscore"),
     fs = require('fs'),
     formidable = require('formidable'),
-    crypto = require('crypto');
+    crypto = require('crypto'),
+    Q = require('q');
 
+// Private functions
 
+// This function uses formidable to
+// parse multipart marker posts, ensure that
+// they are unique and return their
+// values if so.
+// @returns Q promise object
+function parse_marker_post (req, res) {
+    var form,
+        fields,
+        file,
+        image_hash,
+        form_load;
+
+    // Parse form data
+    var form = new formidable.IncomingForm();
+    form.uploadDir = __dirname + '/public/photos/';
+    form.hash = 'md5';
+
+    // Wait for load to finish
+    form_load = Q.defer();
+
+    // Parse all non-file form data then resolve
+    form.parse(req, function (err, fields, files) {
+
+        if (err) {
+            form_load.reject(err);
+            return;
+        }
+
+        fields = fields;
+        file = files;
+
+        form_load.resolve([fields, file, req, res]);
+    });
+
+    // Wait for hash creation AND form parse to finish
+    return form_load.promise;
+}
+
+function validate_marker_post (fields, file, res) {
+
+    // Image file is required
+    if (!file.photo) {
+        message = 'No image file detected. Image is required';
+        console.log(message);
+        res.status(422).json({reason: message});
+        return false;
+    }
+
+    // Coords are required
+    if (!fields.latitude || !fields.longitude) {
+        message = 'Coordinates missing or invalid.';
+        console.log(message);
+        res.status(422).json({reason: message});
+        return false;
+    }
+
+    // Tags required
+    if (!fields.tags) {
+        message = 'Tags missing or invalid.';
+        console.log(message);
+        res.status(422).json({reason: message});
+        return false;
+    }
+
+    // Valid
+    return true;
+}
+
+function save_new_marker (data_array) {
+    var fields = data_array[0],
+        file = data_array[1],
+        req = data_array[2],
+        res = data_array[3],
+        lat,
+        lng,
+        marker;
+
+    // New Marker instance
+    marker = new Marker();
+
+    // Validate marker data
+    if (!validate_marker_post(fields, file, res)) return false;
+
+    // Format coords for geometry storage
+    lat = parseFloat(fields.latitude);
+    lng = parseFloat(fields.longitude);
+    marker.geometry = {
+        "type": "Point",
+        "coordinates": [lng, lat]
+    };
+
+    // Tags, userid
+    marker.tags = fields.tags;
+    marker.user_id = req.user._id;
+
+    // Rename file by hash
+    fs.rename(file.photo.path, __dirname + '/public/photos/' + file.photo.hash + '.jpg', function (err) {
+        if (err) console.log('error renaming file: ' + err);
+    });
+
+    marker.photo_file = file.photo.hash + '.jpg';
+    marker.photo_hash = file.photo.hash;
+
+    // save the marker 
+    marker.save(function(err) {
+
+        if (err) {
+            console.log('Error in saving marker: ' + err);
+
+            console.log('err code: ' + err.code);
+            if (err.code === 16755) {
+                return res.status(422).json({reason: 'Latitude and longitude are not geographically valid.'});
+            } else if (err.code === 11000) {
+                return res.status(422).json({reason: 'Image file already exists. Duplicate images are not allowed.'});
+            } else {
+                return res.status(500).json({reason: 'An internal error occurred'});
+            }
+        }
+
+        // Build return data
+        returnData = marker.toObject();
+        returnData = _.omit(returnData, 'user_id', '__v');
+
+        res.status(201).json({ 
+            message: 'New marker save successful',
+            data: returnData
+        });
+    });
+}
+
+function handle_marker_data_failure () {
+    console.log('marker data failure');
+    return res.status(400).json({reason: 'Error parsing form data. Please ensure form data is well formed.'});
+}
+
+// Api Methods
 module.exports = {
     addMarker: function (req, res) {
         var marker = new Marker(),
@@ -15,100 +153,9 @@ module.exports = {
             message,
             unique_img_hash;
 
-        // Parse form data
-        var form = new formidable.IncomingForm();
-        form.uploadDir = __dirname + '/public/photos/';
-
-        // Create md5 of image as it streams in
-        form.onPart = function (part) {
-            if (part.name === 'photo') {
-                console.log(part);
-                var hash = crypto.createHash('md5');
-                part.addListener('data', function (chunk) {
-                    hash.update(chunk, 'utf-8');
-                    console.log(chunk);
-                });
-
-                part.addListener('end', function () {
-                    unique_img_hash = hash.digest('hex');
-                    console.log('unique_img_hash: ' + unique_img_hash);
-                });
-            }
-        }
-
-        form.parse(req, function (err, fields, files) {
-            console.log('form parse');
-
-            // Image file is required
-            if (!files.photo) {
-                message = 'No image file detected. Image is required';
-                console.log(message);
-                return res.status(422).json({reason: message});
-            }
-
-            // Coords are required
-            if (!fields.latitude || !fields.longitude) {
-                message = 'Coordinates missing or invalid.';
-                console.log(message);
-                return res.status(422).json({reason: message});
-            }
-
-            // Format coords for geometry storage
-            var lat = parseFloat(fields.latitude);
-            var lng = parseFloat(fields.longitude);
-            marker.geometry = {
-                "type": "Point",
-                "coordinates": [lng, lat]
-            };
-
-            // Tags required
-            if (!fields.tags) {
-                message = 'Tags missing or invalid.';
-                console.log(message);
-                return res.status(422).json({reason: message});
-            }
-
-            // Tags, userid
-            marker.tags = fields.tags;
-            marker.user_id = req.user._id;
-
-            // Create unique string from lat, lng, username, timstamp
-            var fullName = fields.latitude;
-            fullName += '_' + fields.longitude;
-            fullName += '_' + req.user.username;
-            fullName += '_' + Date.now();
-            console.log('FULLNAME: ' + fullName);
-
-            // Make hash and rename file
-            var hash = crypto.createHash('md5').update(fullName).digest('hex');
-            fs.rename(files.photo.path, form.uploadDir + '/' + hash + '.jpg');
-
-            marker.photo_file = hash + '.jpg';
-
-            // save the marker 
-            marker.save(function(err) {
-                if (err) {
-                    console.log('Error in saving marker: ' + err);
-
-                    console.log('err code: ' + err.code);
-                    if (err.code === 16755) {
-                        return res.status(500).json({reason: 'Latitude and longitude are not geographically valid.'});
-                    } else {
-                        return res.status(500).json({reason: 'An internal error occurred'});
-                    }
-                }
-
-                // Build return data
-                returnData = marker.toObject();
-                returnData = _.omit(returnData, 'user_id', '__v');
-
-                res.status(201).json({ 
-                    message: 'New marker save successful',
-                    data: returnData
-                });
-            });
-        });
-
+        // Get form data and unique hash
+        parse_marker_post(req, res).then(save_new_marker, handle_marker_data_failure);
+        return;
     },
 
     getMarker: function (req, res) {

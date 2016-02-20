@@ -17,6 +17,7 @@ module.exports = mongoose.model('Marker', {
     },
     tags: String,
     photo_file: String,
+    photo_hash: {type: String, index: {unique: true, dropDups: true}},
     user_id: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
