@@ -54,7 +54,7 @@ function validate_marker_post (fields, file, res) {
     if (!file.photo) {
         message = 'No image file detected. Image is required';
         console.log(message);
-        res.status(422).json({reason: message});
+        res.status(422).json({message: message});
         return false;
     }
 
@@ -62,7 +62,7 @@ function validate_marker_post (fields, file, res) {
     if (!fields.latitude || !fields.longitude) {
         message = 'Coordinates missing or invalid.';
         console.log(message);
-        res.status(422).json({reason: message});
+        res.status(422).json({message: message});
         return false;
     }
 
@@ -70,7 +70,7 @@ function validate_marker_post (fields, file, res) {
     if (!fields.tags) {
         message = 'Tags missing or invalid.';
         console.log(message);
-        res.status(422).json({reason: message});
+        res.status(422).json({message: message});
         return false;
     }
 
@@ -130,11 +130,11 @@ function save_new_marker (data_array) {
 
             console.log('err code: ' + err.code);
             if (err.code === 16755) {
-                return res.status(422).json({reason: 'Latitude and longitude are not geographically valid.'});
+                return res.status(422).json({message: 'Latitude and longitude are not geographically valid.'});
             } else if (err.code === 11000) {
-                return res.status(422).json({reason: 'Image file already exists. Duplicate images are not allowed.'});
+                return res.status(422).json({message: 'Image file already exists. Duplicate images are not allowed.'});
             } else {
-                return res.status(500).json({reason: 'An internal error occurred'});
+                return res.status(500).json({message: 'An internal error occurred'});
             }
         }
 
@@ -151,7 +151,7 @@ function save_new_marker (data_array) {
 
 function handle_marker_data_failure () {
     console.log('marker data failure');
-    return res.status(400).json({reason: 'Error parsing form data. Please ensure form data is well formed.'});
+    return res.status(400).json({message: 'Error parsing form data. Please ensure form data is well formed.'});
 }
 
 // Api Methods
@@ -172,14 +172,14 @@ module.exports = {
 
         Marker.findOne({'_id': req.query.marker_id}, function (err, marker) {
             if (err)
-                return res.status(500).json({reason: 'An internal error occurred'});
+                return res.status(500).json({message: 'An internal error occurred'});
 
             if (!marker)
-                return res.status(404).json({reason: 'No marker was found with id ' + req.query.marker_id});
+                return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
 
             // Make sure user is authorized to see/edit this marker
             if (!marker.user_id.equals(req.user._id)) {
-                return res.status(403).json({reason: 'You are not authorized to view this marker'});
+                return res.status(403).json({message: 'You are not authorized to view this marker'});
             }
 
             // Build return data
@@ -204,11 +204,11 @@ module.exports = {
             Marker.findOne({'_id': marker_id}, function (err, marker) {
                 if (err) {
                     console.log(err);
-                    return res.status(500).json({reason: 'An internal error occurred'});
+                    return res.status(500).json({message: 'An internal error occurred'});
                 }
 
                 if (!marker)
-                    return res.status(404).json({reason: 'No marker was found with id ' + req.query.marker_id});
+                    return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
 
                 // Make sure user is authorized to see/edit this marker
                 if (!marker.user_id.equals(req.user._id)) {
@@ -231,23 +231,23 @@ module.exports = {
 
         } else {
             // No tags found
-            res.status(422).json({reason: 'No tags received. Only tags are editable'});
+            res.status(422).json({message: 'No tags received. Only tags are editable'});
         }
     },
 
     deleteMarker: function (req, res) {
         // No id received 
         if (!req.query.marker_id) {
-            res.status(422).json({reason: 'No id received. Deletion is only possible with an id'});
+            res.status(422).json({message: 'No id received. Deletion is only possible with an id'});
         }
 
         console.log('find one');
         Marker.findOne({'_id': req.query.marker_id}, function (err, marker) { 
             if (err)
-                return res.status(500).json({reason: 'Internal server error'});
+                return res.status(500).json({message: 'Internal server error'});
 
             if (!marker)
-                return res.status(404).json({reason: 'No marker was found with id ' + req.query.marker_id});
+                return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
 
             // Make sure user is authorized to edit/delete this marker
             if (!marker.user_id.equals(req.user._id)) {
@@ -262,7 +262,7 @@ module.exports = {
             fs.unlink(__dirname + '/public/photos/' + marker.photo_file, function (err) {
                 if (err) {
                     console.log('error deleting ' + __dirname + '/../public/photos/' + marker.photo_file);
-                    return res.status(500).json({reason: 'Internal server error'});
+                    return res.status(500).json({message: 'Internal server error'});
                 }
 
                 return res.status(200).json({message: 'Delete marker width id ' + marker._id + ' successful'});
@@ -301,7 +301,7 @@ module.exports = {
                 return res.status(500).json({message: myMongoErrs.get(err.code)});
 
             if (!markers)
-                return res.status(404).json({reason: 'No markers were found.'});
+                return res.status(404).json({message: 'No markers were found.'});
 
             // Build return data (remove private data)
             returnData = markers.map(function (marker) {
