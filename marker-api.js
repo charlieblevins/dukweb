@@ -22,6 +22,7 @@ function parse_marker_post (req, res) {
         image_hash,
         form_load;
 
+	console.log('parse marker post');
     // Parse form data
     var form = new formidable.IncomingForm();
     form.uploadDir = __dirname + '/public/photos/';
@@ -38,10 +39,7 @@ function parse_marker_post (req, res) {
             return;
         }
 
-        fields = fields;
-        file = files;
-
-        form_load.resolve([fields, file, req, res]);
+        form_load.resolve([fields, files, req, res]);
     });
 
     // Wait for hash creation AND form parse to finish
@@ -50,8 +48,11 @@ function parse_marker_post (req, res) {
 
 function validate_marker_post (fields, file, res) {
 
+	console.log('validating photo');
+	console.log(file);
+
     // Image file is required
-    if (!file.photo) {
+    if (!file) {
         message = 'No image file detected. Image is required';
         console.log(message);
         res.status(422).json({message: message});
@@ -80,27 +81,37 @@ function validate_marker_post (fields, file, res) {
 
 function save_new_marker (data_array) {
     var fields = data_array[0],
-        file = data_array[1],
+        files = data_array[1],
         req = data_array[2],
         res = data_array[3],
         lat,
         lng,
         marker;
 
+	console.log('save new marker');
+
     // New Marker instance
     marker = new Marker();
 
     // Validate marker data
-    if (!validate_marker_post(fields, file, res)) {
+    if (!validate_marker_post(fields, files.photo, res)) {
 
-        // Delete file
-        if (file && file.photo) {
-            console.log('delete file: ' + file.photo.path);
-            fs.unlink(file.photo.path);
-        }
+		console.log('validate marker post returned false');
+
+        // Delete files
+        files.forEach(function (file) {
+
+			if (file && file.photo) {
+				console.log('delete file: ' + file.photo.path);
+				fs.unlink(file.photo.path);
+			}
+
+		});
 
         return false;
     }
+
+	console.log('validation complete');
 
     // Format coords for geometry storage
     lat = parseFloat(fields.latitude);
@@ -114,10 +125,25 @@ function save_new_marker (data_array) {
     marker.tags = fields.tags;
     marker.user_id = req.user._id;
 
-    // Rename file by hash
-    fs.rename(file.photo.path, __dirname + '/public/photos/' + file.photo.hash + '.jpg', function (err) {
-        if (err) console.log('error renaming file: ' + err);
-    });
+    // Rename files by hash
+    for (var file in files) {
+		console.log('renaming ' + file.name);
+		console.log(file);
+		console.log('\n');
+
+		var new_name = file.photo.hash;
+
+		// File names should be photo, photo_md, and photo_sm
+		var size = file.name.replace('photo_');
+
+		if (size) new_name = new_name + size;
+
+		console.log('new name: ' + new_name);
+
+		fs.rename(file.photo.path, __dirname + '/public/photos/' + new_name + '.jpg', function (err) {
+			if (err) console.log('error renaming file: ' + err);
+		});
+	}
 
     marker.photo_file = file.photo.hash + '.jpg';
     marker.photo_hash = file.photo.hash;
