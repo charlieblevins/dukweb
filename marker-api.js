@@ -126,27 +126,29 @@ function save_new_marker (data_array) {
     marker.user_id = req.user._id;
 
     // Rename files by hash
-    for (var file in files) {
+    for (var file_name in files) {
+		var file = files[file_name];
 		console.log('renaming ' + file.name);
 		console.log(file);
 		console.log('\n');
 
-		var new_name = file.photo.hash;
+		// Use full size hash for all photos
+		var new_name = files.photo.hash;
 
 		// File names should be photo, photo_md, and photo_sm
-		var size = file.name.replace('photo_');
+		var size = file.name.replace('photo', '');
 
 		if (size) new_name = new_name + size;
 
 		console.log('new name: ' + new_name);
 
-		fs.rename(file.photo.path, __dirname + '/public/photos/' + new_name + '.jpg', function (err) {
+		fs.rename(file.path, __dirname + '/public/photos/' + new_name + '.jpg', function (err) {
 			if (err) console.log('error renaming file: ' + err);
 		});
 	}
 
-    marker.photo_file = file.photo.hash + '.jpg';
-    marker.photo_hash = file.photo.hash;
+    marker.photo_file = files.photo.hash + '.jpg';
+    marker.photo_hash = files.photo.hash;
 
     // save the marker 
     marker.save(function(err) {
