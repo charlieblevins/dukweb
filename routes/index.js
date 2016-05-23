@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var marker_api = require('../marker-api.js');
+var icon_generator = require('../icon-generator.js');
 
 
 var isAuthenticated = function (req, res, next) {
@@ -71,6 +72,11 @@ module.exports = function (passport) {
     // No auth required to get markers within a polygon
     router.route('/api/markersWithin/')
         .get(marker_api.getMarkersWithin);
+
+
+    // Icon Generator
+    router.route('/icon/:noun')
+        .get(icon_generator.generate, icon_generator.send);
 
     return router;    
 }

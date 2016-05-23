@@ -5,6 +5,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+// Set project root
+global.appRoot = path.resolve(__dirname);
+
 var app = express();
 
 // Configure locals
