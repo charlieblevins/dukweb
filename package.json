@@ -16,6 +16,7 @@
     "express": "~4.13.1",
     "express-session": "^1.12.1",
     "formidable": "^1.0.17",
+    "gm": "^1.22.0",
     "jade": "~1.11.0",
     "kerberos": "0.0.17",
     "moment": "^2.10.6",
