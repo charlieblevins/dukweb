@@ -2,9 +2,10 @@
  * Generate or retrive marker icons when requested 
  */
 
-var FS = require('q-io');
+var FS = require('q-io/fs');
+var fs = require('fs');
 
-var Q = requrie('q');
+var Q = require('q');
 
 var NounProject = require('the-noun-project'),
     nounProject = new NounProject({
@@ -18,24 +19,26 @@ var PNG = require('pngjs').PNG;
 // Graphics magick / Image Magick
 var gm = require('gm').subClass({imageMagick: true});
 
+var request = require('request');
+
 module.exports = {
 
     // Get an icon either by generating it or from
     // cache.
-    generate: function (req, res) {
+    generate: function (req, res, next) {
         var icon_path;
 
         // Check if icon is already cached (generated)
         // and if so, return it
-        req.icon_path = appRoot + '/public/icons/' + req.query.noun + '.png';
+        req.icon_path = appRoot + '/public/icons/' + req.params.noun + '.png';
 
-        fs.stat(req.icon_path);
-            .then(function (stats) {
+        FS.isFile(req.icon_path)
+            .then(function (exists) {
 
                 var def = Q.defer();
                 
                 // No file for this noun
-                if (stats.isFile()) {
+                if (exists) {
                     next();
                     return;
                 }
@@ -43,12 +46,14 @@ module.exports = {
 
                 // Call to noun project and 
                 // retrieve first result
-                nounProject.getIconsByTerm(req.query.noun, {limit: 1}, function (err, data) {
+                nounProject.getIconsByTerm(req.params.noun, {limit: 1}, function (err, data) {
 
                     if (err) {
                         def.reject(err);
                         throw err; 
                     }
+
+                    console.log('Noun project returned data.');
 
                     def.resolve(data.icons[0]);
                 });
@@ -59,46 +64,67 @@ module.exports = {
                 var def = Q.defer();
 
                 // GET png from noun project
+                console.log('GETting ' + icon_data.preview_url);
+
                 request(icon_data.preview_url)
 
+                .on('error', function (err) {
+                    console.log(err);
+                    def.reject(err);
+                })
+                
                 .pipe(new PNG({filterType: 4}))
                 
                 .on('parsed', function() {
+
+                    console.log('parsed PNG');
 
                     // Change color to white
                     convert_white(this);
 
                     // Write white file. Name "noun_white.png"
-                    var write_stream = fs.createWriteStream(appRoot + '/img_processing/interim/' + req.query.noun + '_white.png');
+                    var white_img_path = appRoot + '/img_processing/interim/' + req.params.noun + '_white.png';
+                    var write_stream = fs.createWriteStream(white_img_path);
                     this.pack().pipe(write_stream);
 
                     write_stream.on('finish', function () {
-                        def.resolve();
+                        def.resolve(white_img_path);
                     });
                 });
 
                 return def.promise;
 
-            }).then(function () {
+            }).then(function (white_img_path) {
+
+                return trim_transparent(white_img_path, req.params.noun);
+
+            }).then(function (trimmed) {
                 
                 // Add image over empty marker background
-                var front_img = appRoot + '/img_processing/interim/' + req.query.noun + '_white.png';
                 var bg_img = appRoot + '/img_processing/icon_bgs/blue_bg.png';
 
-                return composite(front_img, bg_img, req.query.noun)
+                return composite(trimmed, bg_img, req.params.noun)
                 
             }).then(function (comp_file) {
 
                 // Save 3 sizes for iphone
-                return write_3_sizes(comp_file);
+                return write_3_sizes(comp_file, req.params.noun);
 
             // Let express next() move to send stage
-            }).then(next);
+            }).then(function () {
+                console.log('3 images written');
+                next();
+            })
+
+            .catch(function (err) {
+                throw err;
+            });
     },
 
     send: function (req, res) {
 
-        res.sendFile(filePath, function (err) {
+        console.log('Sending file: ' + req.icon_path);
+        res.sendFile(req.icon_path, function (err) {
 
             if (err) {
                 console.log(err);
@@ -106,7 +132,7 @@ module.exports = {
                 return;
             }
 
-            console.log('Sent: ' + filePath);
+            console.log('Sent: ' + req.icon_path);
 
         });
 
@@ -144,6 +170,27 @@ function convert_white (png_obj) {
     return png_obj;
 }
 
+function trim_transparent (icon_img, noun) {
+    var def = Q.defer(),
+        trimmed = appRoot + '/img_processing/interim/' + noun + '_trimmed_150.png';
+
+    console.log('Trimming transparent');
+    gm(icon_img)
+    .trim()
+    .resize(150, 150)
+    .write(trimmed, function (err) {
+        if (err) {
+            def.reject();
+            throw err;
+        }
+
+        console.log("Trimmed image written");
+        def.resolve(trimmed);
+    });
+
+    return def.promise;
+}
+
 /**
  * Run image magick composite to add icon over circle
  */
@@ -153,7 +200,7 @@ function composite (front_img_path, bg_img_path, noun) {
 
     gm(bg_img_path)
     .composite(front_img_path)
-    .geometry('+100+150')
+    .gravity('Center')
     .write(comp_file, function (err) {
         if (err) {
             def.reject();
@@ -170,12 +217,12 @@ function composite (front_img_path, bg_img_path, noun) {
 /**
  * Write 3 sizes
  */
-function write_3_sizes (full_img) {
+function write_3_sizes (full_img, new_name) {
 
     return Q.all([
-        resize(full_img, [38, 38], req.query.noun + '.png'),
-        resize(full_img, [76, 76], req.query.noun + '@2x.png'),
-        resize(full_img, [114, 114], req.query.noun + '@3x.png'),
+        resize(full_img, [38, 38], new_name + '.png'),
+        resize(full_img, [76, 76], new_name + '@2x.png'),
+        resize(full_img, [114, 114], new_name + '@3x.png')
     ]);
 }
 
