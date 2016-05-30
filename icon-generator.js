@@ -33,7 +33,7 @@ module.exports = {
 
         // Check if icon is already cached (generated)
         // and if so, return it
-        req.icon_path = appRoot + '/public/icons/' + req.params.noun;
+        req.icon_path = appRoot + '/public/icons/' + req.params.noun.toLowerCase();
         console.log('checking for icon in: ' + req.icon_path);
 
         FS.isFile(req.icon_path)

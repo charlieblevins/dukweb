@@ -125,29 +125,6 @@ function save_new_marker (data_array) {
     marker.tags = fields.tags;
     marker.user_id = req.user._id;
 
-    // Rename files by hash
-    for (var file_name in files) {
-		var file = files[file_name];
-		console.log('renaming ' + file.name);
-		console.log(file);
-		console.log('\n');
-
-		// Use full size hash for all photos
-		var new_name = files.photo.hash;
-
-		// File names should be photo, photo_md, and photo_sm
-		var size = file.name.replace('photo', '');
-
-		if (size) new_name = new_name + size;
-
-		console.log('new name: ' + new_name);
-
-		fs.rename(file.path, __dirname + '/public/photos/' + new_name + '.jpg', function (err) {
-			if (err) console.log('error renaming file: ' + err);
-		});
-	}
-
-    marker.photo_file = files.photo.hash + '.jpg';
     marker.photo_hash = files.photo.hash;
 
     // save the marker 
@@ -165,6 +142,24 @@ function save_new_marker (data_array) {
                 return res.status(500).json({message: 'An internal error occurred'});
             }
         }
+
+		// Rename files by hash
+		for (var file_name in files) {
+			var file = files[file_name];
+
+			// Use full size hash for all photos
+			var new_name = marker.toObject()._id;
+
+			// File names should be photo, photo_md, and photo_sm
+			var size = file.name.replace('photo', '');
+
+			if (size) new_name = new_name + size;
+
+			console.log('Renaming ' + file.name + ' to ' + new_name);
+			fs.rename(file.path, __dirname + '/public/photos/' + new_name + '.jpg', function (err) {
+				if (err) console.log('error renaming file: ' + err);
+			});
+		}
 
         // Build return data
         returnData = marker.toObject();
