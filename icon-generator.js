@@ -22,7 +22,8 @@ var gm = require('gm').subClass({imageMagick: true});
 var request = require('request');
 
 var requested_noun,
-    requested_size;
+    requested_size,
+    icon_num;
 
 module.exports = {
 
@@ -51,22 +52,34 @@ module.exports = {
                 requested_size = req.params.noun.match(/@(.*[2,3]x)/gi);
                 requested_size = (requested_size && requested_size.length) ? requested_size[0].toLowerCase() : '';
 
+		// Allow query param to specify which icon 
+		// is selected from noun project
+		icon_num = parseInt(req.query.icon);
+
+		// Limit to 20th result
+		icon_num = (icon_num && icon_num < 21 && icon_num > 0) ? icon_num : 1;
+
                 // Get noun by removing size and .png extension. turtle@2x.png -> turtle
                 requested_noun = req.params.noun.replace(/@(.*)|.png/gi, '');
 
                 // Call to noun project and 
                 // retrieve first result
-                nounProject.getIconsByTerm(requested_noun, {limit: 1}, function (err, data) {
+                nounProject.getIconsByTerm(requested_noun, {limit: icon_num}, function (err, data) {
 
                     if (err) {
                         def.reject(err);
                         console.log('NounProject returned: ' + err); 
+
+			console.log('returning fallback dot marker');
+
+			req.icon_path = appRoot + '/public/icons/dot' + requested_size + '.png';
+			next();
                         return;
                     }
 
                     console.log('Noun project returned data.');
 
-                    def.resolve(data.icons[0]);
+                    def.resolve(data.icons[icon_num - 1]);
                 });
 
                 return def.promise;
@@ -110,9 +123,13 @@ module.exports = {
                 return trim_transparent(white_img_path, requested_noun);
 
             }).then(function (trimmed) {
+
+		// Get random color background
+		var colors = ['blue', 'grass', 'green', 'purple', 'red'];
+		var bg_color = colors[parseInt(Math.floor(Math.random() * colors.length))];
                 
                 // Add image over empty marker background
-                var bg_img = appRoot + '/img_processing/icon_bgs/blue_bg.png';
+                var bg_img = appRoot + '/img_processing/icon_bgs/' + bg_color + '_bg.png';
 
                 return composite(trimmed, bg_img, requested_noun)
                 
