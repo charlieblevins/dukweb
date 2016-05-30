@@ -21,6 +21,9 @@ var gm = require('gm').subClass({imageMagick: true});
 
 var request = require('request');
 
+var requested_noun,
+    requested_size;
+
 module.exports = {
 
     // Get an icon either by generating it or from
@@ -30,7 +33,8 @@ module.exports = {
 
         // Check if icon is already cached (generated)
         // and if so, return it
-        req.icon_path = appRoot + '/public/icons/' + req.params.noun + '.png';
+        req.icon_path = appRoot + '/public/icons/' + req.params.noun;
+        console.log('checking for icon in: ' + req.icon_path);
 
         FS.isFile(req.icon_path)
             .then(function (exists) {
@@ -43,14 +47,21 @@ module.exports = {
                     return;
                 }
 
+                // Get size setting (either '', '@2x', or '@3x')
+                requested_size = req.params.noun.match(/@(.*[2,3]x)/gi);
+                requested_size = (requested_size && requested_size.length) ? requested_size[0].toLowerCase() : '';
+
+                // Get noun by removing size and .png extension. turtle@2x.png -> turtle
+                requested_noun = req.params.noun.replace(/@(.*)|.png/gi, '');
 
                 // Call to noun project and 
                 // retrieve first result
-                nounProject.getIconsByTerm(req.params.noun, {limit: 1}, function (err, data) {
+                nounProject.getIconsByTerm(requested_noun, {limit: 1}, function (err, data) {
 
                     if (err) {
                         def.reject(err);
-                        throw err; 
+                        console.log('NounProject returned: ' + err); 
+                        return;
                     }
 
                     console.log('Noun project returned data.');
@@ -83,7 +94,7 @@ module.exports = {
                     convert_white(this);
 
                     // Write white file. Name "noun_white.png"
-                    var white_img_path = appRoot + '/img_processing/interim/' + req.params.noun + '_white.png';
+                    var white_img_path = appRoot + '/img_processing/interim/' + requested_noun + '_white.png';
                     var write_stream = fs.createWriteStream(white_img_path);
                     this.pack().pipe(write_stream);
 
@@ -96,19 +107,19 @@ module.exports = {
 
             }).then(function (white_img_path) {
 
-                return trim_transparent(white_img_path, req.params.noun);
+                return trim_transparent(white_img_path, requested_noun);
 
             }).then(function (trimmed) {
                 
                 // Add image over empty marker background
                 var bg_img = appRoot + '/img_processing/icon_bgs/blue_bg.png';
 
-                return composite(trimmed, bg_img, req.params.noun)
+                return composite(trimmed, bg_img, requested_noun)
                 
             }).then(function (comp_file) {
 
                 // Save 3 sizes for iphone
-                return write_3_sizes(comp_file, req.params.noun);
+                return write_3_sizes(comp_file, requested_noun);
 
             // Let express next() move to send stage
             }).then(function () {
@@ -117,7 +128,7 @@ module.exports = {
             })
 
             .catch(function (err) {
-                throw err;
+                console.log(err);
             });
     },
 
