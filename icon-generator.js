@@ -42,22 +42,25 @@ module.exports = {
 
                 var def = Q.defer();
                 
-                // No file for this noun
+                // File for this noun exists
                 if (exists) {
+                    def.reject('File exists');
                     next();
-                    return;
+
+                    // Return promise to prevent further execution 
+                    return def.promise;
                 }
 
                 // Get size setting (either '', '@2x', or '@3x')
                 requested_size = req.params.noun.match(/@(.*[2,3]x)/gi);
                 requested_size = (requested_size && requested_size.length) ? requested_size[0].toLowerCase() : '';
 
-		// Allow query param to specify which icon 
-		// is selected from noun project
-		icon_num = parseInt(req.query.icon);
+                // Allow query param to specify which icon 
+                // is selected from noun project
+                icon_num = parseInt(req.query.icon);
 
-		// Limit to 20th result
-		icon_num = (icon_num && icon_num < 21 && icon_num > 0) ? icon_num : 1;
+                // Limit to 20th result
+                icon_num = (icon_num && icon_num < 21 && icon_num > 0) ? icon_num : 1;
 
                 // Get noun by removing size and .png extension. turtle@2x.png -> turtle
                 requested_noun = req.params.noun.replace(/@(.*)|.png/gi, '');
@@ -66,14 +69,32 @@ module.exports = {
                 // retrieve first result
                 nounProject.getIconsByTerm(requested_noun, {limit: icon_num}, function (err, data) {
 
+                    // NP returns 404 if no matching icons
                     if (err) {
-                        def.reject(err);
-                        console.log('NounProject returned: ' + err); 
 
-			console.log('returning fallback dot marker');
+                        console.log('Noun does not exist at NounProject. Returning default');
 
-			req.icon_path = appRoot + '/public/icons/dot' + requested_size + '.png';
-			next();
+                        // Make symbolic link from this noun to default dot.png images
+                        var default_icon_path = appRoot + '/public/icons/dot';
+                        var sym_path = appRoot + '/public/icons/' + requested_noun;
+
+                        Q.all([
+                            FS.symbolicCopy(default_icon_path + '.png', sym_path + '.png'),
+                            FS.symbolicCopy(default_icon_path + '@2x.png', sym_path + '@2x.png'),
+                            FS.symbolicCopy(default_icon_path + '@3x.png', sym_path + '@3x.png')
+
+                        // All finished
+                        ]).then(function () {
+
+                            req.icon_path = appRoot + '/public/icons/' + requested_noun + requested_size + '.png';
+
+                            // Next middleware
+                            next();
+
+                            // Exit icon generation procedure
+                            def.reject(err);
+                            
+                        });
                         return;
                     }
 
@@ -124,9 +145,9 @@ module.exports = {
 
             }).then(function (trimmed) {
 
-		// Get random color background
-		var colors = ['blue', 'grass', 'green', 'purple', 'red'];
-		var bg_color = colors[parseInt(Math.floor(Math.random() * colors.length))];
+                // Get random color background
+                var colors = ['blue', 'grass', 'green', 'purple', 'red'];
+                var bg_color = colors[parseInt(Math.floor(Math.random() * colors.length))];
                 
                 // Add image over empty marker background
                 var bg_img = appRoot + '/img_processing/icon_bgs/' + bg_color + '_bg.png';
