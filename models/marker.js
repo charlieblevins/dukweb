@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-module.exports = mongoose.model('Marker', {
+var marker_schema = mongoose.Schema({
     geometry: {
         "type": {
             "type": String,
@@ -23,3 +23,5 @@ module.exports = mongoose.model('Marker', {
     },
     createdDate: { type: Date, default: Date.now } 
 });
+
+module.exports = mongoose.model('Marker', marker_schema);
