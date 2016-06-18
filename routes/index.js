@@ -65,7 +65,7 @@ module.exports = function (passport) {
         .post(isBasicAuth, marker_api.addMarker);
 
     router.route('/api/markers/')
-        .get(isBasicAuth, marker_api.getMarker)
+        .get(marker_api.getMarker)
         .put(isBasicAuth, marker_api.editMarker)
         .delete(isBasicAuth, marker_api.deleteMarker)
 
