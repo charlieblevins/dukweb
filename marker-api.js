@@ -200,11 +200,6 @@ module.exports = {
             if (!marker)
                 return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
 
-            // Make sure user is authorized to see/edit this marker
-            if (!marker.user_id.equals(req.user._id)) {
-                return res.status(403).json({message: 'You are not authorized to view this marker'});
-            }
-
             // Build return data
             returnData = marker.toObject();
             returnData = _.omit(returnData, 'user_id', '__v');
