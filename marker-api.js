@@ -88,7 +88,7 @@ function save_new_marker (data_array) {
         lng,
         marker;
 
-	console.log('save new marker');
+	console.log('save new marker with fields: ' + fields.toString());
 
     // New Marker instance
     marker = new Marker();
@@ -127,7 +127,6 @@ function save_new_marker (data_array) {
 
     marker.photo_hash = files.photo.hash;
 
-    console.log('saving marker: ' + marker.toString());
 
     // save the marker 
     marker.save(function(err) {
