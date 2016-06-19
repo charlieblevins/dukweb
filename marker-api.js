@@ -6,7 +6,10 @@ var Marker = require('./models/marker.js'),
     fs = require('fs'),
     formidable = require('formidable'),
     crypto = require('crypto'),
-    Q = require('q');
+    Q = require('q'),
+	mongoose = require('mongoose'),
+	ObjectId = mongoose.Types.ObjectId;
+
 
 // Private functions
 
@@ -199,7 +202,7 @@ module.exports = {
             .aggregate([
 
                 // Find marker by id
-                { "$match" : {'_id': req.query.marker_id}},
+                { "$match" : {'_id': ObjectId(req.query.marker_id) } },
 
                 // Join username from users collection
                 { "$lookup" : { 
@@ -222,6 +225,8 @@ module.exports = {
                 // Build return data
                 returnData = marker.toObject();
                 returnData = _.omit(returnData, 'user_id', '__v');
+
+				console.log('Returning data: ' + returnData.toString());
 
                 res.json({
                     message: 'found marker',
