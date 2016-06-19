@@ -195,22 +195,39 @@ module.exports = {
     getMarker: function (req, res) {
         console.log('Get marker id: ' + req.query.marker_id);
 
-        Marker.findOne({'_id': req.query.marker_id}, function (err, marker) {
-            if (err)
-                return res.status(500).json({message: 'An internal error occurred'});
+        Marker
+            .aggregate([
 
-            if (!marker)
-                return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
+                // Find marker by id
+                { "$match" : {'_id': req.query.marker_id}},
 
-            // Build return data
-            returnData = marker.toObject();
-            returnData = _.omit(returnData, 'user_id', '__v');
+                // Join username from users collection
+                { "$lookup" : { 
+                    "from" : "users",
+                    "localField" : "user_id",
+                    "foreignField" : "_id",
+                    "as" : "user_info" }
+                },
 
-            res.json({
-                message: 'found marker',
-                data: returnData
+                // Project (filter) only necessary fields
+                { "$project" : {"createdDate" : 1, "tags" : 1, "photo_hash" : 1, "geometry" : 1, "user_info.username" : 1}}
+            ])
+            .exec(function (err, marker) {
+                if (err)
+                    return res.status(500).json({message: 'An internal error occurred'});
+
+                if (!marker)
+                    return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
+
+                // Build return data
+                returnData = marker.toObject();
+                returnData = _.omit(returnData, 'user_id', '__v');
+
+                res.json({
+                    message: 'found marker',
+                    data: returnData
+                });
             });
-        });
     },
 
     editMarker: function (req, res) {
