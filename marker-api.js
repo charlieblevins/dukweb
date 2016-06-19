@@ -219,14 +219,13 @@ module.exports = {
                 if (err)
                     return res.status(500).json({message: 'An internal error occurred'});
 
-                if (!marker)
+                if (!marker || !marker[0])
                     return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
 
                 // Build return data
-                returnData = marker.toObject();
-                returnData = _.omit(returnData, 'user_id', '__v');
+                returnData = marker[0];
 
-				console.log('Returning data: ' + returnData.toString());
+		console.log('Return data: ' + JSON.stringify(returnData, null, 4));
 
                 res.json({
                     message: 'found marker',
