@@ -88,7 +88,8 @@ function save_new_marker (data_array) {
         lng,
         marker;
 
-	console.log('save new marker with fields: ' + fields.toString());
+	console.log('save new marker with fields: ');
+	console.log(fields);
 
     // New Marker instance
     marker = new Marker();
