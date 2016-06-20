@@ -182,6 +182,82 @@ function handle_marker_data_failure () {
     return res.status(400).json({message: 'Error parsing form data. Please ensure form data is well formed.'});
 }
 
+/**
+ * Returns Q promise
+ */
+function get_marker_data (marker_id) {
+    var def = Q.defer();
+
+    Marker
+        .aggregate([
+
+            // Find marker by id
+            { "$match" : {'_id': ObjectId(marker_id) } },
+
+            // Join username from users collection
+            { "$lookup" : { 
+                "from" : "users",
+                "localField" : "user_id",
+                "foreignField" : "_id",
+                "as" : "user_info" }
+            },
+
+            // Project (filter) only necessary fields
+            { "$project" : {"createdDate" : 1, "tags" : 1, "photo_hash" : 1, "geometry" : 1, "user_info.username" : 1}}
+        ])
+        .exec(function (err, marker) {
+            if (err)
+                return def.reject({'message': 'An internal error occurred', 'status': 500});
+
+            if (!marker || !marker[0])
+                return def.reject({'status': 404, message: 'No marker was found with id ' + marker_id});
+
+            // Build return data
+            returnData = marker[0];
+
+            // Make joined username field a property of main object
+            if (returnData.user_info && returnData.user_info.length) {
+                returnData.username = returnData.user_info[0].username;
+            }
+
+            delete returnData.user_info;
+
+            def.resolve(returnData);
+        });
+
+    return def.promise;
+}
+
+/**
+ * Get base 64 image data for a photo by it's id an size
+ * @param size {string} - one of "full", "md", or "sm"
+ */
+function get_photo_b64 (marker_id, size) {
+    var def = Q.defer(),
+        size_suffix,
+        b64_data;
+
+    if (!marker_id) {
+        console.log('marker_id is required for get_photo_b64');
+        return def.reject({'status': 500, 'message': 'An internal error occurred'});
+    }
+
+    // If md or sm, use "_sm"/"_md" otherwise empty string
+    size_suffix = (size === 'md' || size === 'sm') ? '_' + size : '';
+
+    fs.readFile(appRoot + '/public/photos/' + marker_id + size_suffix + '.jpg', function (err, data_buffer) {
+        if (err) {
+            console.log(err);
+            return def.reject({'status': 500, 'message': 'An internal error occurred'});
+        }
+
+        b64_data = data_buffer.toString('base64');
+        def.resolve(b64_data);
+    });
+
+    return def.promise;
+}
+
 // Api Methods
 module.exports = {
     addMarker: function (req, res) {
@@ -196,41 +272,28 @@ module.exports = {
     },
 
     getMarker: function (req, res) {
+        var async_operations = [],
+            returnData;
+
         console.log('Get marker id: ' + req.query.marker_id);
 
-        Marker
-            .aggregate([
+        // Get marker data
+        async_operations.push(get_marker_data(req.query.marker_id));
 
-                // Find marker by id
-                { "$match" : {'_id': ObjectId(req.query.marker_id) } },
+        // Get image data (if requested)
+        if (req.query.photo) {
+            async_operations.push(get_photo_b64(req.query.marker_id, req.query.photo));
+        }
 
-                // Join username from users collection
-                { "$lookup" : { 
-                    "from" : "users",
-                    "localField" : "user_id",
-                    "foreignField" : "_id",
-                    "as" : "user_info" }
-                },
+        Q.all(async_operations)
+            .spread(function (data, img_data) {
 
-                // Project (filter) only necessary fields
-                { "$project" : {"createdDate" : 1, "tags" : 1, "photo_hash" : 1, "geometry" : 1, "user_info.username" : 1}}
-            ])
-            .exec(function (err, marker) {
-                if (err)
-                    return res.status(500).json({message: 'An internal error occurred'});
+                returnData = data;
 
-                if (!marker || !marker[0])
-                    return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
-
-                // Build return data
-                returnData = marker[0];
-
-                // Make joined username field a property of main object
-                if (returnData.user_info && returnData.user_info.length) {
-                    returnData.username = returnData.user_info[0].username;
+                // Insert img_data if returned
+                if (img_data) {
+                    returnData.photo = img_data;
                 }
-
-                delete returnData.user_info;
 
                 console.log('Return data: ' + JSON.stringify(returnData, null, 4));
 
@@ -238,7 +301,11 @@ module.exports = {
                     message: 'found marker',
                     data: returnData
                 });
+                
+            }).catch(function (reason) {
+               res.status(reason.status).json({message: reason.message}); 
             });
+
     },
 
     editMarker: function (req, res) {
