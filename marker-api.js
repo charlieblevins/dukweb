@@ -225,7 +225,14 @@ module.exports = {
                 // Build return data
                 returnData = marker[0];
 
-		console.log('Return data: ' + JSON.stringify(returnData, null, 4));
+                // Make joined username field a property of main object
+                if (returnData.user_info && returnData.user_info.length) {
+                    returnData.username = returnData.user_info[0].username;
+                }
+
+                delete returnData.user_info;
+
+                console.log('Return data: ' + JSON.stringify(returnData, null, 4));
 
                 res.json({
                     message: 'found marker',
