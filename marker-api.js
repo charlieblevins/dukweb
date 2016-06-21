@@ -295,10 +295,10 @@ module.exports = {
                 // Insert img_data if returned
                 if (img_data) {
                     returnData.photo = {
-		        'data': img_data,
+                        'data': img_data,
                         'size': req.query.photo
                     };
-		    console.log('Including b64 img data: ' + img_data.substring(0, 20));
+                    console.log('Including b64 img data: ' + img_data.substring(0, 20));
                 }
 
                 res.json({
