@@ -19,6 +19,7 @@
 		var password = document.querySelector('input[name="password"]').value;
 
 		var messageToPost = {
+			'action': 'loginAttempt',
 			'username': username,
 			'password': password
 		};
