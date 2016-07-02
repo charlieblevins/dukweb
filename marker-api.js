@@ -451,7 +451,7 @@ module.exports = {
 
         var opts = {
             spherical: true,
-            limit: 30
+            limit: 20
         }
 
         Marker.geoNear(point, opts, function (err, data, stats) {
