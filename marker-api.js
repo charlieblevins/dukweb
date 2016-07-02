@@ -414,8 +414,8 @@ module.exports = {
                 }
             }
         });
-	query.limit(30);
-	query.exec(function (err, markers) {
+        query.limit(30);
+        query.exec(function (err, markers) {
 
             // Handle results
             if (err)
@@ -432,6 +432,45 @@ module.exports = {
 
             res.json({
                 message: 'Markers found: ' + markers.length,
+                data: returnData
+            });
+        });
+    },
+
+    getMarkersNear: function (req, res) {
+
+        if (!req.query.lat || !req.query.lng) {
+            res.status(422).json({message: 'Missing parameters.'});
+            return;
+        }
+
+        // Parse requested coords
+        var lng = parseFloat(req.query.lng),
+            lat = parseFloat(req.query.lat),
+            point = { type: 'Point', coordinates: [lng, lat] };
+
+        var opts = {
+            spherical: true,
+            limit: 30
+        }
+
+        Marker.geoNear(point, opts, function (err, data, stats) {
+        
+            // Handle results
+            if (err)
+                return res.status(500).json({message: myMongoErrs.get(err.code)});
+
+            if (!data)
+                return res.status(404).json({message: 'No markers were found.'});
+
+            // Build return data (remove private data)
+            returnData = data.map(function (marker) {
+                var mo = marker.obj.toObject();
+                return _.omit(mo, 'user_id', '__v');
+            });
+
+            res.json({
+                message: 'Markers found: ' + data.length,
                 data: returnData
             });
         });

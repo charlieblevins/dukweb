@@ -2,7 +2,7 @@
  * Generate marker data and insert all into markers 
  */
 
-var Marker = require('./models/marker.js'),
+var Marker = require('../models/marker.js'),
 
     Range = function (min, max) {
         this.min = min;
@@ -19,7 +19,7 @@ var Marker = require('./models/marker.js'),
         };
     },
     // Db configuration
-    dbConfig = require('./db.js'),
+    dbConfig = require('../db.js'),
     mongoose = require('mongoose'),
 	ObjectId = mongoose.Types.ObjectId;
 

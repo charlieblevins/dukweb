@@ -84,6 +84,10 @@ module.exports = function (passport) {
     router.route('/api/markersWithin/')
         .get(marker_api.getMarkersWithin);
 
+    // No auth required to get markers near a point 
+    router.route('/api/markersNear/')
+        .get(marker_api.getMarkersNear);
+
 
     // Icon Generator
     router.route('/icon/:noun')
