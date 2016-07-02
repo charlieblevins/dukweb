@@ -16,7 +16,9 @@ var marker_schema = mongoose.Schema({
         }
     },
     tags: String,
-    photo_hash: {type: String, index: {unique: true, dropDups: true}},
+
+    // Must be unique, will drop duplicates, allow sparse (multiple null IS allowed)
+    photo_hash: {type: String, index: {unique: true, dropDups: true, sparse: true}},
     user_id: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
