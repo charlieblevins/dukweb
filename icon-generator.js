@@ -21,16 +21,16 @@ var gm = require('gm').subClass({imageMagick: true});
 
 var request = require('request');
 
-var requested_noun,
-    requested_size,
-    icon_num;
 
 module.exports = {
 
     // Get an icon either by generating it or from
     // cache.
     generate: function (req, res, next) {
-        var icon_path;
+        var icon_path,
+            requested_noun,
+            requested_size,
+            icon_num;
 
         // Check if icon is already cached (generated)
         // and if so, return it
@@ -280,13 +280,17 @@ function write_3_sizes (full_img, new_name) {
 function resize (full_img, new_size, new_name) {
     var def = Q.defer();
 
+    var new_file = appRoot + '/public/icons/' + new_name;
+
     gm(full_img)
     .resize(new_size[0], new_size[1])
-    .write(appRoot + '/public/icons/' + new_name, function (err) {
+    .write(new_file, function (err) {
         if (err) {
             def.reject(err);
             throw err;
         }
+
+        console.log(new_file + ' write successful');
 
         def.resolve();
     });
