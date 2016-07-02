@@ -209,7 +209,6 @@ function convert_white (png_obj) {
             var green = png_obj.data[idx + 1];
             var blue = png_obj.data[idx + 2];
             var opacity = png_obj.data[idx + 3];
-            console.log(red + ', ' + green + ', ' + blue + ', ' + opacity);
 
             // and reduce opacity
             //png_obj.data[idx+3] = png_obj.data[idx+3] >> 1;

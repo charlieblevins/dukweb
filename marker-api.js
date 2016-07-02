@@ -404,7 +404,7 @@ module.exports = {
 
         
         // Mongo query
-        Marker.find({
+        var query = Marker.find({
             geometry: {
                 $geoWithin: {
                     $box: [
@@ -413,7 +413,9 @@ module.exports = {
                     ]
                 }
             }
-        }, function (err, markers) {
+        });
+	query.limit(30);
+	query.exec(function (err, markers) {
 
             // Handle results
             if (err)
