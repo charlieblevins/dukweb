@@ -63,7 +63,7 @@ for (var i = 0; i < 500; i++) {
 }
 
 // Bulk insert
-Marker.collection.insert(marker_arr, function (err, docs) {
+Marker.insertMany(marker_arr, function (err, docs) {
     if (err) return console.log('Insert err: ' + err);
 
     console.info('%d markers successfully inserted', docs.length);
