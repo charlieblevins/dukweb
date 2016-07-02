@@ -13,10 +13,21 @@ var isAuthenticated = function (req, res, next) {
     res.redirect('/');
 }
 
+
 module.exports = function (passport) {
 
     // Http basic auth handler
     var isBasicAuth = passport.authenticate('basic', { session : false });
+
+    // If authorization header exists, use basic, else local auth
+    var basicOrLocalAuth = function (req, res, next) {
+        
+        if (req.headers['authorization']) {
+	    return isBasicAuth(req, res, next);
+	} else {
+	    return isAuthenticated(req, res, next);
+        }
+    };
 
     /* GET home page. */
     router.get('/', function(req, res, next) {
@@ -43,7 +54,7 @@ module.exports = function (passport) {
     }));
 
     /* GET Home Page */
-    router.get('/home', isAuthenticated, function (req, res) {
+    router.get('/home', basicOrLocalAuth, function (req, res) {
         res.render('home', { user: req.user });
     });
 
