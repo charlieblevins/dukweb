@@ -414,7 +414,20 @@ module.exports = {
                 }
             }
         });
-        query.limit(30);
+
+        // Paged result if page param exists
+        if (req.query.page) {
+            var res_per_page = 20;
+            var page_index = parseInt(req.query.page) - 1;
+
+            if (page_index >= 0) {
+                query.skip(page_index * res_per_page);
+            } else {
+                console.log('invalid page value');
+            }
+        }
+
+        query.limit(20);
         query.exec(function (err, markers) {
 
             // Handle results
@@ -466,6 +479,10 @@ module.exports = {
             // Build return data (remove private data)
             returnData = data.map(function (marker) {
                 var mo = marker.obj.toObject();
+
+                // Return distance
+                mo.distance = marker.dis;
+
                 return _.omit(mo, 'user_id', '__v');
             });
 
