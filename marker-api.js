@@ -475,7 +475,7 @@ module.exports = {
             opts.query = { 
                 'tags': {
                     $elemMatch: {
-                        $eq: req.query.noun 
+                        $eq: req.query.noun.trim()
                     }
                 }
             }
