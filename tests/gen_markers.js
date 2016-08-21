@@ -39,7 +39,7 @@ function rand_array_val (arr) {
 }
 
 var marker_arr = [];
-for (var i = 0; i < 500; i++) {
+for (var i = 0; i < 5000; i++) {
 
     var rand_lat = lat_range.random();
     var rand_lng = lng_range.random();
@@ -53,8 +53,8 @@ for (var i = 0; i < 500; i++) {
         "coordinates": [rand_coord.lng, rand_coord.lat]
     };
 
-    // Tags, userid
-    marker.tags = rand_array_val(possible_tags);
+    // Generate two random tags 
+    marker.tags = [rand_array_val(possible_tags), rand_array_val(possible_tags)];
 
     // Insert all as fake user for easy removal
     // User: cbradio@gmail.com

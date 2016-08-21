@@ -15,7 +15,7 @@ var marker_schema = mongoose.Schema({
             index: '2dsphere'
         }
     },
-    tags: String,
+    tags: Array,
 
     // Must be unique, will drop duplicates, allow sparse (multiple null IS allowed)
     photo_hash: {type: String, index: {unique: true, dropDups: true, sparse: true}},

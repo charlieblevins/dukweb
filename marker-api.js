@@ -467,6 +467,20 @@ module.exports = {
             limit: 30
         }
 
+        // Filter by noun if passed
+        if (req.query.noun) {
+
+            console.log('Filter by noun');
+
+            opts.query = { 
+                'tags': {
+                    $elemMatch: {
+                        $eq: req.query.noun 
+                    }
+                }
+            }
+        }
+
         Marker.geoNear(point, opts, function (err, data, stats) {
         
             // Handle results
