@@ -26,4 +26,7 @@ var marker_schema = mongoose.Schema({
     createdDate: { type: Date, default: Date.now } 
 });
 
-module.exports = mongoose.model('Marker', marker_schema);
+module.exports = {
+    'Marker': mongoose.model('Marker', marker_schema),
+    'DeletedMarker': mongoose.model('DeletedMarker', marker_schema),
+}

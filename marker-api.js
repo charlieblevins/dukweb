@@ -1,7 +1,9 @@
 // Each function returns data to be 
 // parsed to json and sent to requestor
 
-var Marker = require('./models/marker.js'),
+var models = require('./models/marker.js'),
+    Marker = models.Marker,
+    DeletedMarker = models.DeletedMarker,
     _ = require("underscore"),
     fs = require('fs'),
     formidable = require('formidable'),
@@ -373,19 +375,19 @@ module.exports = {
                 return res.status(403).json({message: 'You are not authorized to view this marker'});
             }
 
+            // Add to deleted collection
+            var delMarker = new DeletedMarker();
+
+            delMarker.geometry = marker.geometry;
+            delMarker.tags = marker.tags;
+            delMarker.photo_hash = marker.photo_hash;
+            delMarker.user_id = marker.user_id;
+            delMarker.createdDate = marker.createdDate;
+
+            delMarker.save();
+
             // Delete from db
-            marker.remove();
-            console.log('test');
-
-            // Delete photo file
-            fs.unlink(__dirname + '/public/photos/' + marker.photo_file, function (err) {
-                if (err) {
-                    console.log('error deleting ' + __dirname + '/../public/photos/' + marker.photo_file);
-                    return res.status(500).json({message: 'Internal server error'});
-                }
-
-                return res.status(200).json({message: 'Delete marker width id ' + marker._id + ' successful'});
-            });
+            //marker.remove();
         });
     },
 
