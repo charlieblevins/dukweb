@@ -16,6 +16,10 @@ app.locals.moment = require('moment');
 // Db configuration
 var dbConfig = require('./db.js');
 var mongoose = require('mongoose');
+
+// Fix for promise depracation warning
+mongoose.Promise = global.Promise;
+
 mongoose.connect(dbConfig.url);
 var db = mongoose.connection;
 

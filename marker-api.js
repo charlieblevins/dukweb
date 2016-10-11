@@ -127,8 +127,9 @@ function save_new_marker (data_array) {
         "coordinates": [lng, lat]
     };
 
-    // Tags, userid
-    marker.tags = fields.tags;
+    // Split tags on spaces
+    marker.tags = fields.tags.split(' ');
+
     marker.user_id = req.user._id;
 
     marker.photo_hash = files.photo.hash;
@@ -364,16 +365,36 @@ module.exports = {
 
         console.log('find one');
         Marker.findOne({'_id': req.query.marker_id}, function (err, marker) { 
-            if (err)
+            if (err) {
+                console.log('error!!!');
+                console.log(err);
+                console.log(marker);
                 return res.status(500).json({message: 'Internal server error'});
+            }
 
-            if (!marker)
+            if (!marker) {
                 return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
+            }
 
             // Make sure user is authorized to edit/delete this marker
             if (!marker.user_id.equals(req.user._id)) {
                 return res.status(403).json({message: 'You are not authorized to view this marker'});
             }
+
+            // Move photos to archive
+            ['', '_md', '_sm'].forEach((suffix) => {
+
+                const photo = marker._id.toString() + suffix + '.jpg';
+                const existing_path = __dirname + '/public/photos/' + photo;
+                const archive = __dirname + '/photo_archive/' + photo;
+
+                fs.rename(existing_path, archive, function (err) {
+                    if (err) console.log('error renaming file: ' + err);
+
+                    console.log('archive of ' + photo + ' successful');
+                });
+            });
+
 
             // Add to deleted collection
             var delMarker = new DeletedMarker();
@@ -387,7 +408,9 @@ module.exports = {
             delMarker.save();
 
             // Delete from db
-            //marker.remove();
+            marker.remove();
+
+            res.status(204).json({message: 'marker with id: ' + req.query.marker_id + ' deleted successfully'});
         });
     },
 

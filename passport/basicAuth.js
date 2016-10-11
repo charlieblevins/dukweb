@@ -25,7 +25,7 @@ module.exports = function (passport) {
 
             // User and password both match, return user form done method
             // which will be treated like success
-            console.log('success! user: ' + user);
+            console.log('user login success: ' + user);
             return done(null, user);
         });
     }));
