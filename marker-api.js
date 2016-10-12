@@ -47,6 +47,16 @@ function parse_marker_post (req, res) {
         form_load.resolve([fields, files, req, res]);
     });
 
+    // log progress
+    var percent = 0;
+    form.on('progress', function (bytesReceived, bytesExpected) {
+        var new_percent = Math.floor((bytesReceived / bytesExpected) * 100);
+        if (new_percent > percent) {
+            console.log(new_percent + '%');
+            percent = new_percent;
+        }
+    });
+
     // Wait for hash creation AND form parse to finish
     return form_load.promise;
 }
@@ -54,7 +64,6 @@ function parse_marker_post (req, res) {
 function validate_marker_post (fields, file, res) {
 
 	console.log('validating photo');
-	console.log(file);
 
     // Image file is required
     if (!file) {
@@ -93,8 +102,7 @@ function save_new_marker (data_array) {
         lng,
         marker;
 
-	console.log('save new marker with fields: ');
-	console.log(fields);
+	console.log('save new marker with fields');
 
     // New Marker instance
     marker = new Marker();
