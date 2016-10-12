@@ -365,10 +365,9 @@ module.exports = {
 
         console.log('find one');
         Marker.findOne({'_id': req.query.marker_id}, function (err, marker) { 
+
             if (err) {
-                console.log('error!!!');
                 console.log(err);
-                console.log(marker);
                 return res.status(500).json({message: 'Internal server error'});
             }
 
@@ -395,7 +394,6 @@ module.exports = {
                 });
             });
 
-
             // Add to deleted collection
             var delMarker = new DeletedMarker();
 
@@ -404,13 +402,14 @@ module.exports = {
             delMarker.photo_hash = marker.photo_hash;
             delMarker.user_id = marker.user_id;
             delMarker.createdDate = marker.createdDate;
+            delMarker.orig_id = marker._id;
 
             delMarker.save();
 
             // Delete from db
             marker.remove();
 
-            res.status(204).json({message: 'marker with id: ' + req.query.marker_id + ' deleted successfully'});
+            res.status(200).json({message: 'marker with id: ' + req.query.marker_id + ' deleted successfully'});
         });
     },
 

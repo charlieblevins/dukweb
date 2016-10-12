@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var marker_schema = mongoose.Schema({
+var base_schema = {
     geometry: {
         "type": {
             "type": String,
@@ -24,9 +24,15 @@ var marker_schema = mongoose.Schema({
         ref: 'User'
     },
     createdDate: { type: Date, default: Date.now } 
-});
+}
+
+var marker_schema = mongoose.Schema(base_schema);
+
+// Add orig id field to deleted markers
+base_schema.orig_id = { type: mongoose.Schema.Types.ObjectId };
+var deleted_marker_schema = base_schema;
 
 module.exports = {
     'Marker': mongoose.model('Marker', marker_schema),
-    'DeletedMarker': mongoose.model('DeletedMarker', marker_schema),
+    'DeletedMarker': mongoose.model('DeletedMarker', deleted_marker_schema),
 }
