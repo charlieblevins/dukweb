@@ -8,7 +8,8 @@ a {
   color: #00B7FF;
 }
 
-.form-signin{
+.form-signin,
+.form-code-entry {
     max-width: 330px;
     padding: 15px;
     margin: 0 auto;

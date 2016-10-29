@@ -25,9 +25,11 @@ module.exports = function (passport) {
             if (user) {
                 console.log('User already exists with username: ' + username);
                 return done(null, false, req.flash('message', 'User already exists'));
+
             } else if (password !== req.param('confirm-pass')) {
                 console.log('Passwords do not match.');
                 return done(null, false, req.flash('message', 'Passwords must match'));
+
             } else {
                 // If there is no user with that email
                 // create the user
@@ -36,6 +38,17 @@ module.exports = function (passport) {
                 // set the user's local credentials
                 newUser.username = username;
                 newUser.password = createHash(password);
+
+                // set the user's verification code
+                newUser.email_verification.code = 
+
+                // expiration 20 minutes from now
+                var d = new Date();
+                d.setMinutes(d.getMinutes() + 20);
+                newUser.email_verification.expiration = d; 
+
+                // Random code
+                newUser.email_verification.code = generatePin();
 
                 // save the user
                 newUser.save(function(err) {
@@ -53,5 +66,16 @@ module.exports = function (passport) {
     // Generates hash using bCrypt
     var createHash = function(password){
         return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
+    }
+
+    // Generate a random 6 digit code
+    var generatePin = function () {
+        var pin = '';
+        for (var i = 0; i < 6; i++) {
+            var dig = Math.random() * 10;
+            var rounded = Math.floor(dig)
+            pin += rounded; 
+        }
+        return pin;
     }
 }

@@ -23,9 +23,9 @@ module.exports = function (passport) {
     var basicOrLocalAuth = function (req, res, next) {
         
         if (req.headers['authorization']) {
-	    return isBasicAuth(req, res, next);
-	} else {
-	    return isAuthenticated(req, res, next);
+            return isBasicAuth(req, res, next);
+        } else {
+            return isAuthenticated(req, res, next);
         }
     };
 
@@ -41,17 +41,27 @@ module.exports = function (passport) {
         failureFlash: true
     }));
 
-    /* GET Registration Page */
+    // GET Registration Page
+    // form submits to /signup
     router.get('/signup', function(req, res) {
         res.render('register', {message: req.flash('message')});
     });
 
+    /* Handle Registration POST */
+    router.post('/signup', function (req, res, next) {
+        var r = passport.authenticate('signup')(req, res, next);
+        console.log(r);
+        return r;
+    });
+
+    router.get('/code-entry', function(req, res) {
+        res.render('code-entry', {message: req.flash('message')});
+    });
+    
     /* Handle REgistration POST */
-    router.post('/signup', passport.authenticate('signup', {
-        successRedirect: '/home',
-        failureRedirect: '/signup',
-        failureFlash: true
-    }));
+    router.post('/code-entry', function (req, res) {
+        res.redirect('/home');
+    });
 
     /* GET Home Page */
     router.get('/home', basicOrLocalAuth, function (req, res) {
