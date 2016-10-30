@@ -39,9 +39,6 @@ module.exports = function (passport) {
                 newUser.username = username;
                 newUser.password = createHash(password);
 
-                // set the user's verification code
-                newUser.email_verification.code = 
-
                 // expiration 20 minutes from now
                 var d = new Date();
                 d.setMinutes(d.getMinutes() + 20);

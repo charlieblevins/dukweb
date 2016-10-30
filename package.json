@@ -17,6 +17,7 @@
     "express-session": "^1.12.1",
     "formidable": "^1.0.17",
     "gm": "^1.22.0",
+    "handlebars": "^4.0.5",
     "jade": "~1.11.0",
     "moment": "^2.10.6",
     "mongodb": "^2.0.52",

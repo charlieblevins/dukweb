@@ -1,0 +1,2 @@
+download remote photo for testing:
+scp -i ../../../aws_dukapp.pem ec2-user@ec2-54-152-93-11.compute-1.amazonaws.com:/var/www/duckmap/public/photos/5729e941d379671e6cecb122.jpg ./
