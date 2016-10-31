@@ -5,7 +5,8 @@ var user_schema = mongoose.Schema({
     password: String,
     email_verification: {
         code: String,
-        expiration: { type: Date }
+        expiration: { type: Date },
+        verified: Boolean
     },
     createdDate: { type: Date, default: Date.now } 
 });

@@ -36,11 +36,21 @@ module.exports = function (passport) {
     });
 
     /* Handle Login POST */
-    router.post('/login', passport.authenticate('login', {
-        successRedirect: '/home',
-        failureRedirect: '/',
-        failureFlash: true
-    }));
+    router.post('/login',
+        passport.authenticate('login', {
+            failureRedirect: '/',
+            failureFlash: true
+        }),
+        function (req, res) {
+            // Email verify required to login
+            if (req.user.email_verification.verified !== true) {
+                return res.redirect('/code-entry');
+            }
+
+            // logged in and verified
+            res.redirect('/home');
+        }
+    );
 
     // GET Registration Page
     // form submits to /signup
@@ -63,7 +73,7 @@ module.exports = function (passport) {
             if (req.isAuthenticated()) return next();
 
             console.log('Tried to access code-entry without auth. Redirect to /login');
-            return res.redirect('login');
+            return res.redirect('/');
 
         }, function(req, res) {
             res.render('code-entry', {message: req.flash('message')});

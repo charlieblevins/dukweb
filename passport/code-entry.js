@@ -18,9 +18,25 @@ module.exports = function (req, res, next) {
         return res.render('/code-entry', {message: 'The entered code does not match our records.'});
     }
 
-    // User and password both match, return user form done method
-    // which will be treated like success
-    console.log('verification successful');
-    req.session.message = 'Email successfully verified.';
-    return res.redirect('/home');
+    // Save verification
+    User.findOne({'username': req.user.username}, function (err, user) {
+
+        // Set verified
+        user.email_verification.verified = true;
+
+        user.save((err) => {
+            if (err) {
+                console.log('Could not save user\'s verification');
+                return res.render('/code-entry', {message: 'An internal error occurred. Code 1'});
+            }
+
+            console.log('verification successful');
+            req.session.message = 'Email successfully verified.';
+            return res.redirect('/home');
+        });
+    });
+
 }
+
+// Code 1
+// Failed to save user's verification flag as true

@@ -49,6 +49,9 @@ module.exports = function (passport) {
                 var code = generatePin();
                 newUser.email_verification.code = code;
 
+                // Not yet verified
+                newUser.email_verification.verified = false;
+
                 // save the user
                 newUser.save(function(err) {
                     if (err) {
