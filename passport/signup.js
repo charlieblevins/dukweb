@@ -1,6 +1,7 @@
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user');
 var bCrypt = require('bcrypt-nodejs');
+var dukmail = require('../mail.js');
 
 module.exports = function (passport) {
 
@@ -41,11 +42,12 @@ module.exports = function (passport) {
 
                 // expiration 20 minutes from now
                 var d = new Date();
-                d.setMinutes(d.getMinutes() + 20);
+                d.setMinutes(d.getMinutes() + 30);
                 newUser.email_verification.expiration = d; 
 
                 // Random code
-                newUser.email_verification.code = generatePin();
+                var code = generatePin();
+                newUser.email_verification.code = code;
 
                 // save the user
                 newUser.save(function(err) {
@@ -53,8 +55,14 @@ module.exports = function (passport) {
                         console.log('Error in saving user: ' + err);
                         throw err;
                     }
-                    console.log('User registration successful');
-                    return done(null, newUser, req.flash('message', 'Registration successful!'));
+                    console.log('User save complete');
+
+                    // Send email
+                    dukmail.sendVerifCode(username, code).done(() => {
+
+                        console.log('email sent. registration successful');
+                        return done(null, newUser, req.flash('message', 'Registration successful!'));
+                    });
                 });
             }
         });

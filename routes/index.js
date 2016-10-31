@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var marker_api = require('../marker-api.js');
 var icon_generator = require('../icon-generator.js');
+var is_code_valid = require('../passport/code-entry.js');
 
 
 var isAuthenticated = function (req, res, next) {
@@ -48,24 +49,40 @@ module.exports = function (passport) {
     });
 
     /* Handle Registration POST */
-    router.post('/signup', function (req, res, next) {
-        var r = passport.authenticate('signup')(req, res, next);
-        console.log(r);
-        return r;
-    });
+    router.post('/signup', passport.authenticate('signup', {
+        successRedirect: '/code-entry',
+        failureRedirect: '/signup',
+        failureFlash: true
+    }));
 
-    router.get('/code-entry', function(req, res) {
-        res.render('code-entry', {message: req.flash('message')});
-    });
+    // Code entry page. Must be logged in
+    router.get('/code-entry',
+
+        // Ensure auth
+        function (req, res, next) {
+            if (req.isAuthenticated()) return next();
+
+            console.log('Tried to access code-entry without auth. Redirect to /login');
+            return res.redirect('login');
+
+        }, function(req, res) {
+            res.render('code-entry', {message: req.flash('message')});
+        }
+    );
     
-    /* Handle REgistration POST */
-    router.post('/code-entry', function (req, res) {
-        res.redirect('/home');
-    });
+    // Handle code entry POST 
+    // must be logged in to access
+    router.post('/code-entry', is_code_valid);
 
     /* GET Home Page */
     router.get('/home', basicOrLocalAuth, function (req, res) {
-        res.render('home', { user: req.user });
+        var context = { user: req.user };
+
+        if (req.session && req.session.message) {
+            context.message = req.session.message;
+            console.log('session messaged received');
+        }
+        res.render('home', context);
     });
 
     router.get('/signout', function(req, res) {

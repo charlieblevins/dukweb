@@ -5,11 +5,12 @@ block content
         div.row
             div.col-sm-6.col-md-4.col-md-offset-4
                 h1.text-center.login-title Code Entry 
-                    div.signup-wall
-                        form(class='form-code-entry', action='/code-entry', method='POST')
-                            input(type='tel', name='code', class='form-control', placeholder='',required)
-                            button(class='btn btn-lg btn-primary btn-block', type='submit') Submit 
-                            span.clearfix
-                    #message
-                        if message
-                            h1.text-center.error-message #{message}
+                p Last step. Please enter the verification code sent to your email address.
+                div.signup-wall
+                    form(class='form-code-entry', action='/code-entry', method='POST')
+                        input(type='tel', name='code', class='form-control', placeholder='',required)
+                        button(class='btn btn-lg btn-primary btn-block', type='submit') Submit 
+                        span.clearfix
+                #message
+                    if message
+                        h1.text-center.error-message #{message}
