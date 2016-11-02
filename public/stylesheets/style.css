@@ -8,7 +8,11 @@ a {
   color: #00B7FF;
 }
 
-.form-signin,
+.form-register,
+.form-signin {
+    margin: 0 auto;
+    padding: 20px;
+}
 .form-code-entry {
     max-width: 330px;
     padding: 15px;
@@ -17,10 +21,8 @@ a {
 .form-signin .form-signin-heading, .form-signin .checkbox{
     margin-bottom: 10px;
 }
-.form-signin .checkbox{
-    font-weight: normal;
-}
-.form-signin .form-control{
+.form-register .form-control,
+.form-signin .form-control {
     position: relative;
     font-size: 16px;
     height: auto;
@@ -29,47 +31,71 @@ a {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
-.form-signin .form-control:focus{
+.form-register .form-control:focus,
+.form-signin .form-control:focus {
     z-index: 2;
 }
+
+/* Sign in form */
 .form-signin input[type="text"]{
     margin-bottom: -1px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
-.form-signin input[type="password"]{
+.form-signin input[type="password"] {
     margin-bottom: 10px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
-.form-signin input[type="password"].nomargin{
-    margin-bottom: 0px;
+.form-signin input[type="password"].nomargin {
+    margin-bottom: 0;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
-.account-wall{
+
+/* Register form */
+.form-register input[type="email"] {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: -1px;
+}
+.form-register input[name="password"] {
+    border-radius: 0;
+    margin-bottom: -1px;
+}
+.form-register input[name="confirm-pass"] {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* Code entry form */
+.form-code-entry input[type="number"] {
+    margin-bottom: 10px;
+}
+input::-webkit-inner-spin-button {
+    display: none;
+}
+
+
+.signup-wall,
+.account-wall {
     margin-top: 20px;
     padding: 0px;
     background-color: #f7f7f7;
-    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    border: 1px solid #dedede;
+    padding: 0 0 20px 0;
 }
-.signup-wall{
-    margin-top: 20px;
-    padding: 20px 0px 20px 0px;
-    background-color: #f7f7f7;
-    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3); 
+.signup-wall {
+    padding: 0;
 }
-.login-title{
+.login-title {
     color: #555;
     font-size: 18px;
     font-weight: 400;
     display: block;
 }
-.profile-img{
+.profile-img {
     width: 96px;
     height: 96px;
     margin: 0 auto 10px;
@@ -78,13 +104,13 @@ a {
     -webkit-border-radius: 50%;
     border-radius: 50%;
 }
-.new-account{
-    display: block;
-    margin-top: 10px;
+.new-account {
+    display: inline-block;
+    margin-top: 2px;
 }
-h1.error-message{
-    color: red;
+p.error-message {
+    color: #dd4b39;
 }
-ul.user-details{
+ul.user-details {
     list-style: none;
 }

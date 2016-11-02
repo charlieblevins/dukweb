@@ -8,9 +8,11 @@ block content
                 p Last step. Please enter the verification code sent to your email address.
                 div.signup-wall
                     form(class='form-code-entry', action='/code-entry', method='POST')
-                        input(type='tel', name='code', class='form-control', placeholder='',required)
+                        input(type='number', name='code', class='form-control', placeholder='',required)
+
+                        #message
+                            if message
+                                p.text-center.error-message #{message}
+
                         button(class='btn btn-lg btn-primary btn-block', type='submit') Submit 
                         span.clearfix
-                #message
-                    if message
-                        h1.text-center.error-message #{message}

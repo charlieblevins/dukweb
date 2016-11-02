@@ -15,7 +15,7 @@ module.exports = function (req, res, next) {
     if (submitted_code !== code) {
 
         console.log('Wrong code entered: ' + submitted_code + '. Instead of ' + code);
-        return res.render('/code-entry', {message: 'The entered code does not match our records.'});
+        return res.render('code-entry', {message: 'The entered code does not match our records.'});
     }
 
     // Save verification
