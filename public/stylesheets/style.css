@@ -95,22 +95,28 @@ input::-webkit-inner-spin-button {
     font-weight: 400;
     display: block;
 }
-.profile-img {
-    width: 96px;
-    height: 96px;
-    margin: 0 auto 10px;
-    display: block;
-    -moz-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    border-radius: 50%;
-}
-.new-account {
-    display: inline-block;
-    margin-top: 2px;
-}
 p.error-message {
     color: #dd4b39;
 }
-ul.user-details {
-    list-style: none;
+
+/* Account Page (home) */
+table.user-details {
+    width: 100%;
+}
+table.user-details tr td:first-child {
+    text-align: right;
+    padding: 6px 12px 6px 6px;
+}
+table.user-details tr td {
+    text-align: left;
+}
+.account-footer {
+    position: relative;
+    padding-top: 16px;
+}
+.new-account {
+    display: inline-block;
+    position: absolute;
+    top: 16;
+    right: 0;
 }
