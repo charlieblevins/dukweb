@@ -1,0 +1,25 @@
+extends layout
+
+block content
+    div.container
+        div.row
+            div.col-sm-6.col-md-4.col-md-offset-4
+                h1.text-center Delete Duk Account
+                div.account-wall
+                    form(class='form-delete-account', action='/delete-account', method='POST')
+
+                        label(for="type-delete") Confirm by typing "Delete".
+                        input(type='text', name='type-delete', class='form-control', placeholder='Delete',required)
+
+                        label
+                            input(type='checkbox', name='confirm-check', placeholder='',required)
+                            span I understand that clicking the 'Confirm Delete' button may remove all data associated with my account including photos, tags, and geographic data.
+
+                        #message
+                            if message
+                                p.text-center.error-message #{message}
+
+                        button(class='btn btn-lg btn-primary btn-block confirm-delete', type='submit') Confirm Delete 
+                        span.clearfix
+                div.account-footer
+                    a(href='/home') &#x276E; Back to Account 

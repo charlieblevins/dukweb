@@ -1,4 +1,5 @@
-var User = require('../models/user');
+var user_models = require('../models/user');
+var User = user_models.User;
 
 module.exports = function (req, res, next) {
 

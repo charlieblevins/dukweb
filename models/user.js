@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var user_schema = mongoose.Schema({
+var user = {
     username: String,
     password: String,
     email_verification: {
@@ -9,6 +9,11 @@ var user_schema = mongoose.Schema({
         verified: Boolean
     },
     createdDate: { type: Date, default: Date.now } 
-});
+};
 
-module.exports = mongoose.model('User', user_schema);
+var user_deleted = Object.assign({ orig_id: { type: mongoose.Schema.Types.ObjectId }}, user);
+
+module.exports = {
+    'User': mongoose.model('User', mongoose.Schema(user)),
+    'UserDeleted': mongoose.model('UserDeleted', mongoose.Schema(user_deleted)),
+}

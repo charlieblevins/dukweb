@@ -8,6 +8,13 @@ a {
   color: #00B7FF;
 }
 
+h1 {
+    color: #555;
+    font-size: 18px;
+    font-weight: 400;
+    display: block;
+}
+
 .form-register,
 .form-signin {
     margin: 0 auto;
@@ -86,9 +93,6 @@ input::-webkit-inner-spin-button {
     border: 1px solid #dedede;
     padding: 0 0 20px 0;
 }
-.signup-wall {
-    padding: 0;
-}
 .login-title {
     color: #555;
     font-size: 18px;
@@ -119,4 +123,26 @@ table.user-details tr td {
     position: absolute;
     top: 16;
     right: 0;
+}
+
+/* Delete Account Page */
+form.form-delete-account {
+    text-align: left;
+    padding: 20px 20px 0 20px;
+}
+input[name="type-delete"] {
+    margin-bottom: 20px;
+}
+input[name="confirm-check"] {
+    vertical-align: top;
+    width: 12px;
+    margin: 3px 8px 0 0;
+}
+input[name="confirm-check"] + span {
+    display: inline-block;
+    width: calc(100% - 20px);
+    vertical-align: top;
+}
+button.confirm-delete {
+    margin-top: 20px;
 }

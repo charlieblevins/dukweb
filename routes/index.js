@@ -32,7 +32,7 @@ module.exports = function (passport) {
 
     /* GET home page. */
     router.get('/', function(req, res, next) {
-      res.render('index', { message: req.flash('message') });
+        res.render('index', { message: req.flash('message') });
     });
 
     /* Handle Login POST */
@@ -99,6 +99,15 @@ module.exports = function (passport) {
         req.logout();
         res.redirect('/');
     });
+
+    router.get('/delete-account', function(req, res) {
+        res.render('delete-account');
+    });
+
+
+    /** 
+     * API 
+     **/
 
     // Auth Check API (Check if username/password are valid)
     router.route('/api/authCheck')
