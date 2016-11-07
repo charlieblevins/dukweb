@@ -3,6 +3,7 @@ var router = express.Router();
 var marker_api = require('../marker-api.js');
 var icon_generator = require('../icon-generator.js');
 var is_code_valid = require('../passport/code-entry.js');
+var delete_account = require('../passport/delete-account.js');
 
 
 var isAuthenticated = function (req, res, next) {
@@ -103,6 +104,8 @@ module.exports = function (passport) {
     router.get('/delete-account', function(req, res) {
         res.render('delete-account');
     });
+
+    router.post('/delete-account', delete_account);
 
 
     /** 

@@ -1,7 +1,6 @@
 
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
@@ -13,6 +12,11 @@ h1 {
     font-size: 18px;
     font-weight: 400;
     display: block;
+}
+.col-centered {
+    display: block;
+    margin: 0 auto;
+    float: none;
 }
 
 .form-register,
@@ -130,13 +134,7 @@ form.form-delete-account {
     text-align: left;
     padding: 20px 20px 0 20px;
 }
-input[name="type-delete"] {
-    margin-bottom: 20px;
-}
 input[name="confirm-check"] {
-    vertical-align: top;
-    width: 12px;
-    margin: 3px 8px 0 0;
 }
 input[name="confirm-check"] + span {
     display: inline-block;
