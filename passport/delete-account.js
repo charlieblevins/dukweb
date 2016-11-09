@@ -23,6 +23,7 @@ module.exports = function (req, res, next) {
 
     // Check box must confirm delete
     if (req.body['confirm-check'] !== 'confirmed') {
+        console.log(req.body);
         var msg = 'Confirm deletion by checking the box above.';
         console.log(msg);
         return res.status(200).render('delete-account', {'confirm_check': msg});
@@ -30,6 +31,11 @@ module.exports = function (req, res, next) {
 
     // Form is valid. Delete account 
     User.findOne({'username': req.user.username}, function (err, user) {
+
+        if (err) {
+            console.log('Error finding user to delete: ', err);
+            return res.status(500).render('delete-account', {message: 'A system error occurred. Please try again'});
+        }
 
         // Make an entry in deleted users with properties of this existing one
         var user_del = Object.assign(new UserDeleted(), user);
@@ -44,7 +50,7 @@ module.exports = function (req, res, next) {
             user.remove();
 
             console.log('User deletion successful.');
-            req.session.message = 'Your account was successfully deleted';
+            req.flash('message', 'Your account was successfully deleted');
             return res.redirect('/');
         });
     });

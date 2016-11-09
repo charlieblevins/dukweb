@@ -108,8 +108,12 @@ p.error-message {
 }
 
 /* Account Page (home) */
+.table-wrap {
+    padding: 0 10px;
+}
 table.user-details {
     width: 100%;
+    margin: 20px 0 0 0;
 }
 table.user-details tr td:first-child {
     text-align: right;
@@ -122,11 +126,20 @@ table.user-details tr td {
     position: relative;
     padding-top: 16px;
 }
-.new-account {
+.account-home .account-footer {
+    text-align: left;
+    padding: 16px 10px 0 10px;
+}
+.delete-account {
+    position: relative;
+    bottom: 0;
+    left: 0;
+}
+.sign-out {
     display: inline-block;
     position: absolute;
-    top: 16;
-    right: 0;
+    bottom: 0;
+    right: 10px;
 }
 
 /* Delete Account Page */

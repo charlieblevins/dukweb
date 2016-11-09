@@ -13,8 +13,10 @@ block content
 
             div(class="form-check #{confirm_check !== undefined ? 'has-danger' : ''}")
                 label(class="form-check-label")
-                    input(type='checkbox', class="form-check-input", name='confirm-check')
-                    | I understand that clicking the 'Confirm Delete' button may remove all data associated with my account including photos, tags, and geographic data.
+                    input(type='checkbox', class="form-check-input", name='confirm-check' value="confirmed")
+                    span I understand that clicking the 'Confirm Delete' button may remove all data associated with my account including photos, tags, and geographic data.
+                    if confirm_check 
+                        div(class="form-control-feedback") #{confirm_check}
 
             #message
                 if message

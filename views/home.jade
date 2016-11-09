@@ -3,15 +3,17 @@ extends layout
 block content
     #user
         h1.text-center.login-title Duk Account
-        div.signup-wall
-            table.user-details
-                tbody
-                    tr
-                        td Username: 
-                        td #{user.username}
-                    tr
-                        td Member since:
-                        td #{moment(user.createdDate).format("MMMM Do YYYY")}
-        div.account-footer
-            a(href='/delete-account', class='text-center') Delete Account 
-            a(href='/signout', class='new-account') Sign Out
+        div.signup-wall.account-home
+            div.table-wrap
+                table.user-details
+                    tbody
+                        tr
+                            td Username: 
+                            td #{user.username}
+                        tr
+                            td Member since:
+                            td #{moment(user.createdDate).format("MMMM Do YYYY")}
+
+            div.account-footer
+                a(href='/delete-account', class='delete-account text-center') Delete Account 
+                a(href='/signout', class='sign-out') Sign Out
