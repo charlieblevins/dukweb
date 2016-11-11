@@ -41,13 +41,13 @@ module.exports = function (passport) {
                 newUser.username = username;
                 newUser.password = createHash(password);
 
-                // expiration 20 minutes from now
+                // expiration 30 minutes from now
                 var d = new Date();
                 d.setMinutes(d.getMinutes() + 30);
                 newUser.email_verification.expiration = d; 
 
                 // Random code
-                var code = generatePin();
+                var code = dukmail.generatePin();
                 newUser.email_verification.code = code;
 
                 // Not yet verified
@@ -75,16 +75,5 @@ module.exports = function (passport) {
     // Generates hash using bCrypt
     var createHash = function(password){
         return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
-    }
-
-    // Generate a random 6 digit code
-    var generatePin = function () {
-        var pin = '';
-        for (var i = 0; i < 6; i++) {
-            var dig = Math.random() * 10;
-            var rounded = Math.floor(dig)
-            pin += rounded; 
-        }
-        return pin;
     }
 }

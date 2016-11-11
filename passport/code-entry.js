@@ -19,6 +19,14 @@ module.exports = function (req, res, next) {
         return res.render('code-entry', {message: 'The entered code does not match our records.'});
     }
 
+    // Codes expire after 20 minutes
+    var exp = req.user.email_verification.expiration;
+    var now = new Date();
+    if (exp < now) {
+        console.log('Expired code entered. exp: ' + exp + '. Time is ' + now);
+        return res.render('code-entry', {message: 'The entered code is expired. Please request a new one by clicking "Re-send Code" below.'});
+    }
+
     // Save verification
     User.findOne({'username': req.user.username}, function (err, user) {
 
@@ -32,7 +40,7 @@ module.exports = function (req, res, next) {
             }
 
             console.log('verification successful');
-            req.session.message = 'Email successfully verified.';
+            req.flash('message', 'Email successfully verified.')
             return res.redirect('/home');
         });
     });

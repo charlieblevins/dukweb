@@ -4,6 +4,7 @@ var marker_api = require('../marker-api.js');
 var icon_generator = require('../icon-generator.js');
 var is_code_valid = require('../passport/code-entry.js');
 var delete_account = require('../passport/delete-account.js');
+var resend_code = require('../passport/resend-code.js');
 
 
 var isAuthenticated = function (req, res, next) {
@@ -85,14 +86,15 @@ module.exports = function (passport) {
     // must be logged in to access
     router.post('/code-entry', is_code_valid);
 
+    // User requested another verification code
+    router.post('/resend-code', resend_code);
+
     /* GET Home Page */
     router.get('/home', basicOrLocalAuth, function (req, res) {
         var context = { user: req.user };
 
-        if (req.session && req.session.message) {
-            context.message = req.session.message;
-            console.log('session messaged received');
-        }
+        context.message = req.flash('message');
+
         res.render('home', context);
     });
 

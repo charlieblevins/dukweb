@@ -115,6 +115,17 @@ var DukMail = function () {
 		return def.promise;
      }
 
+     // Generate a random 6 digit code
+     this.generatePin = function () {
+        var pin = '';
+        for (var i = 0; i < 6; i++) {
+            var dig = Math.random() * 10;
+            var rounded = Math.floor(dig)
+            pin += rounded; 
+        }
+        return pin;
+    }
+
 	function render_template (path, context) {
 		var def = Q.defer();
 

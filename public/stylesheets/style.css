@@ -19,6 +19,10 @@ h1 {
     float: none;
 }
 
+.form-group {
+    text-align: left;
+}
+
 .form-register,
 .form-signin {
     margin: 0 auto;

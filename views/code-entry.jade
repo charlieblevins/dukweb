@@ -5,7 +5,9 @@ block content
     p Last step. Please enter the verification code sent to your email address.
     div.signup-wall
         form(class='form-code-entry', action='/code-entry', method='POST')
-            input(type='number', name='code', class='form-control', placeholder='',required)
+            div.form-group
+                label Verification Code
+                input(type='number', name='code', class='form-control', placeholder='',required)
 
             #message
                 if message
@@ -13,3 +15,6 @@ block content
 
             button(class='btn btn-lg btn-primary btn-block', type='submit') Submit 
             span.clearfix
+
+    form(action='/resend-code' method='POST')
+        <button type="submit">Re-send Code</button>

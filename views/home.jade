@@ -3,6 +3,9 @@ extends layout
 block content
     #user
         h1.text-center.login-title Duk Account
+        #message
+            if message
+                p.text-center.error-message #{message}
         div.signup-wall.account-home
             div.table-wrap
                 table.user-details
