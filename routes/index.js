@@ -111,13 +111,17 @@ module.exports = function (passport) {
         res.render('home', context);
     });
 
+    router.get('/change-password', basicOrLocalAuth, function(req, res) {
+        res.render('change-password');
+    });
+
+    router.get('/delete-account', basicOrLocalAuth, function(req, res) {
+        res.render('delete-account');
+    });
+
     router.get('/signout', function(req, res) {
         req.logout();
         res.redirect('/');
-    });
-
-    router.get('/delete-account', function(req, res) {
-        res.render('delete-account');
     });
 
     router.post('/delete-account', delete_account);
