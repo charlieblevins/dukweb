@@ -28,7 +28,7 @@ module.exports = function (passport) {
                 console.log('User already exists with username: ' + username);
                 return done(null, false, req.flash('message', 'User already exists'));
 
-            } else if (password !== req.param('confirm-pass')) {
+            } else if (password !== req.body['confirm-pass']) {
                 console.log('Passwords do not match.');
                 return done(null, false, req.flash('message', 'Passwords must match'));
 

@@ -2,7 +2,9 @@ var express = require('express');
 var router = express.Router();
 var marker_api = require('../marker-api.js');
 var icon_generator = require('../icon-generator.js');
-var is_code_valid = require('../passport/code-entry.js');
+var code_entry = require('../passport/code-entry.js');
+var validate_code = code_entry.validate_code;
+var is_verified = code_entry.is_verified;
 var delete_account = require('../passport/delete-account.js');
 var resend_code = require('../passport/resend-code.js');
 
@@ -77,22 +79,33 @@ module.exports = function (passport) {
             console.log('Tried to access code-entry without auth. Redirect to /login');
             return res.redirect('/');
 
-        }, function(req, res) {
-            res.render('code-entry', {message: req.flash('message')});
+        }, 
+
+        // Render code entry page
+        function(req, res) {
+            // Don't allow if code already verified
+            if (!is_verified(req, res)) {
+                res.render('code-entry', {message: req.flash('message')});
+            } else {
+                res.redirect('/home');
+            }
         }
     );
     
     // Handle code entry POST 
     // must be logged in to access
-    router.post('/code-entry', is_code_valid);
+    router.post('/code-entry', validate_code);
 
     // User requested another verification code
     router.post('/resend-code', resend_code);
 
     /* GET Home Page */
     router.get('/home', basicOrLocalAuth, function (req, res) {
-        var context = { user: req.user };
+        if (!is_verified(req, res)) {
+            return res.redirect('/code-entry');
+        }
 
+        var context = { user: req.user };
         context.message = req.flash('message');
 
         res.render('home', context);
