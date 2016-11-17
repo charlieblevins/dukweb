@@ -7,6 +7,7 @@ var validate_code = code_entry.validate_code;
 var is_verified = code_entry.is_verified;
 var delete_account = require('../passport/delete-account.js');
 var resend_code = require('../passport/resend-code.js');
+var change_password = require('../passport/change-password.js');
 
 
 var isAuthenticated = function (req, res, next) {
@@ -114,6 +115,7 @@ module.exports = function (passport) {
     router.get('/change-password', basicOrLocalAuth, function(req, res) {
         res.render('change-password');
     });
+    router.post('/change-password', basicOrLocalAuth, change_password);
 
     router.get('/delete-account', basicOrLocalAuth, function(req, res) {
         res.render('delete-account');
