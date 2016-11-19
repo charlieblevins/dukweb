@@ -1,0 +1,4 @@
+{{message}}
+
+username: {{username}}
+time sent: {{time_sent}}

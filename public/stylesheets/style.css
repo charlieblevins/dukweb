@@ -7,6 +7,10 @@ a {
   color: #00B7FF;
 }
 
+textarea {
+    height: 8em;
+}
+
 h1 {
     color: #555;
     font-size: 18px;
@@ -139,6 +143,8 @@ table.user-details tr td {
 }
 
 /* Delete Account Page */
+form.form-help-message,
+form.form-change-pass,
 form.form-delete-account {
     text-align: left;
     padding: 20px 20px 0 20px;

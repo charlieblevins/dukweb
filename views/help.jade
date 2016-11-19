@@ -1,0 +1,19 @@
+extends layout
+
+block content
+    h1.text-center.login-title Send Us a Message 
+    p If you need help or have comments, please send us a message. 
+    div.account-wall
+        form(class='form-help-message', action='/help', method='POST')
+            div.form-group
+                label Message 
+                textarea(name='message', class='form-control', placeholder='',required)
+
+            #message
+                if message
+                    p.text-center.error-message #{message}
+
+            button(class='btn btn-lg btn-primary btn-block', type='submit') Send 
+            span.clearfix
+    div.account-footer
+        a(href='/home') &#x276E; Back to Account 

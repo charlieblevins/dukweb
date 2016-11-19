@@ -62,7 +62,7 @@ var DukMail = function () {
     /**
      * Send account verification code
      */
-     this.sendVerifCode = function (email, code) {
+    this.sendVerifCode = function (email, code) {
 		var def = Q.defer();
 
         if (!email) {
@@ -112,11 +112,11 @@ var DukMail = function () {
 			});
 		});
 
-		return def.promise;
-     }
+        return def.promise;
+    };
 
      // Generate a random 6 digit code
-     this.generatePin = function () {
+    this.generatePin = function () {
         var pin = '';
         for (var i = 0; i < 6; i++) {
             var dig = Math.random() * 10;
@@ -124,7 +124,44 @@ var DukMail = function () {
             pin += rounded; 
         }
         return pin;
-    }
+    };
+
+    this.sendHelpRequest = function (email, info) {
+        var def = Q.defer();
+        
+        const missing = missing_props(info, ['username', 'time_sent', 'message']);
+        if (missing) {
+            console.log('FAILURE: ' + missing);
+            return false;
+        }
+
+        if (!email) {
+            console.log('FAILURE: Email required');
+            return false;
+        }
+
+        render_template(appRoot + '/views/help-request.txt', info).then((txt) => {
+
+			// Send the email
+			this.send({
+				from: {
+					name: 'Duk User: ' + info.username,
+					email: 'server@dukapp.io'
+				},
+				to_email: "blevins.charlie@gmail.com",
+				subject: 'Help Request',
+				message: {
+					text: txt
+				}
+
+			}).done(() => {
+				def.resolve();
+			});
+            
+        });
+
+        return def.promise;
+    };
 
 	function render_template (path, context) {
 		var def = Q.defer();
@@ -154,6 +191,27 @@ var DukMail = function () {
 		def.reject(err);
 		return def.promise;
 	}
+
+    // If properties are missing, get the info and log it.
+    function missing_props(obj, props) {
+        var missing;
+
+        if (!obj) return "FAILURE: Config object is missing.";
+
+        if (!props.length) return "FAILURE: No required properties were passed.";
+
+        missing = props.filter((prop) => {
+            if (obj[prop] === undefined) {
+                return "Property: " + prop + " is required but missing";
+            }
+        });
+
+        if (missing.length) {
+            return missing.join("\n");
+        }
+
+        return false;
+    }
 }
 
 module.exports = new DukMail();

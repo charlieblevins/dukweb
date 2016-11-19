@@ -8,6 +8,7 @@ var is_verified = code_entry.is_verified;
 var delete_account = require('../passport/delete-account.js');
 var resend_code = require('../passport/resend-code.js');
 var change_password = require('../passport/change-password.js');
+var help_message = require('../passport/help.js');
 
 
 var isAuthenticated = function (req, res, next) {
@@ -112,21 +113,28 @@ module.exports = function (passport) {
         res.render('home', context);
     });
 
+    // change pass
     router.get('/change-password', basicOrLocalAuth, function(req, res) {
         res.render('change-password');
     });
     router.post('/change-password', basicOrLocalAuth, change_password);
 
+    // Delete account
     router.get('/delete-account', basicOrLocalAuth, function(req, res) {
         res.render('delete-account');
     });
+    router.post('/delete-account', delete_account);
+
+    // Help form
+    router.get('/help', basicOrLocalAuth, function(req, res) {
+        res.render('help');
+    });
+    router.post('/help', help_message);
 
     router.get('/signout', function(req, res) {
         req.logout();
         res.redirect('/');
     });
-
-    router.post('/delete-account', delete_account);
 
 
     /** 
