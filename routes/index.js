@@ -136,6 +136,10 @@ module.exports = function (passport) {
         res.redirect('/');
     });
 
+    router.get('/terms-of-service', function (req, res) {
+        res.render('TOS');
+    });
+
 
     /** 
      * API 

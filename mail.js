@@ -142,8 +142,7 @@ var DukMail = function () {
 
         render_template(appRoot + '/views/help-request.txt', info).then((txt) => {
 
-			// Send the email
-			this.send({
+            var email_content = {
 				from: {
 					name: 'Duk User: ' + info.username,
 					email: 'server@dukapp.io'
@@ -153,8 +152,12 @@ var DukMail = function () {
 				message: {
 					text: txt
 				}
+			};
 
-			}).done(() => {
+            console.info(email_content);
+
+			// Send the email
+			this.send(email_content).done(() => {
 				def.resolve();
 			});
             
