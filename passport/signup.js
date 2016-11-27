@@ -34,10 +34,21 @@ module.exports = function (passport) {
             // Require score > 2
             } else if (pass_feedback) {
                 console.dir(pass_feedback);
+
+                // Pass back entered values
+                req.flash('username', username);
+                console.log(req.body['confirm-tos']);
+                req.flash('confirm_tos', req.body['confirm-tos']);
+
                 return done(null, false, req.flash('message', pass_feedback));
 
             } else if (password !== req.body['confirm-pass']) {
                 console.log('Passwords do not match.');
+
+                // Pass back entered values
+                req.flash('username', username);
+                req.flash('confirm_tos', req.body['confirm-tos']);
+
                 return done(null, false, req.flash('message', 'Passwords must match'));
 
             } else if (req.body['confirm-tos'] !== 'agree') {

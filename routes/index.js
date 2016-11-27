@@ -61,7 +61,11 @@ module.exports = function (passport) {
     // GET Registration Page
     // form submits to /signup
     router.get('/signup', function(req, res) {
-        res.render('register', {message: req.flash('message')});
+        res.render('register', {
+            message: req.flash('message'),
+            username: req.flash('username'),
+            confirm_tos: req.flash('confirm_tos')
+        });
     });
 
     /* Handle Registration POST */
