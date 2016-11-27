@@ -4,13 +4,13 @@ block content
     h1.text-center.login-title Registration Details
     div.signup-wall
         form(class='form-register', action='/signup', method='POST')
-            input(type='email', name='email', class='form-control', placeholder='Email',required)
+            input(type='email', name='email', class='form-control', placeholder='Email', required)
             input(type='password', name='password', class='form-control nomargin', placeholder='Password', required)
             input(type='password', name='confirm-pass', class='form-control nomargin', placeholder='Confirm Password', required)
 
             div(class="form-check #{confirm_tos !== undefined ? 'has-danger' : ''}")
                 label(class="form-check-label")
-                    input(type='checkbox', class="form-check-input", name='confirm-tos' value="agree")
+                    input(type='checkbox', class="form-check-input", name='confirm-tos' value="agree", required)
                     span I agree to the 
                         a(href="/terms-of-service", target="_blank") Terms of Service
                         | .

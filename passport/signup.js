@@ -3,6 +3,7 @@ var user_models = require('../models/user');
 var User = user_models.User;
 var bCrypt = require('bcrypt-nodejs');
 var dukmail = require('../mail.js');
+var passFeedback = require('./pass-feedback.js');
 
 module.exports = function (passport) {
 
@@ -23,10 +24,17 @@ module.exports = function (passport) {
                 return done(err);
             }
 
+            var pass_feedback = passFeedback(password);
+
             // already exists
             if (user) {
                 console.log('User already exists with username: ' + username);
                 return done(null, false, req.flash('message', 'User already exists'));
+
+            // Require score > 2
+            } else if (pass_feedback) {
+                console.dir(pass_feedback);
+                return done(null, false, req.flash('message', pass_feedback));
 
             } else if (password !== req.body['confirm-pass']) {
                 console.log('Passwords do not match.');
