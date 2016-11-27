@@ -32,6 +32,10 @@ module.exports = function (passport) {
                 console.log('Passwords do not match.');
                 return done(null, false, req.flash('message', 'Passwords must match'));
 
+            } else if (req.body['confirm-tos'] !== 'agree') {
+                console.log('Terms not confirmed.');
+                return done(null, false, req.flash('message', 'Please agree to the Terms of Service'));
+
             } else {
                 // If there is no user with that email
                 // create the user

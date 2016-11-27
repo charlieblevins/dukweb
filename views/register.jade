@@ -8,6 +8,15 @@ block content
             input(type='password', name='password', class='form-control nomargin', placeholder='Password', required)
             input(type='password', name='confirm-pass', class='form-control nomargin', placeholder='Confirm Password', required)
 
+            div(class="form-check #{confirm_tos !== undefined ? 'has-danger' : ''}")
+                label(class="form-check-label")
+                    input(type='checkbox', class="form-check-input", name='confirm-tos' value="agree")
+                    span I agree to the 
+                        a(href="/terms-of-service", target="_blank") Terms of Service
+                        | .
+                    if confirm_tos 
+                        div(class="form-control-feedback") #{confirm_check}
+
             if message 
                 div#message
                     p.text-center.error-message #{message}

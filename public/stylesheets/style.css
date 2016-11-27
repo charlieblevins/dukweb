@@ -27,6 +27,10 @@ h1 {
     text-align: left;
 }
 
+.form-check {
+    text-align: left;
+}
+
 .form-register,
 .form-signin {
     margin: 0 auto;
@@ -85,6 +89,7 @@ h1 {
 .form-register input[name="confirm-pass"] {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+    margin-bottom: 1rem;
 }
 
 /* Code entry form */
