@@ -8,14 +8,13 @@ block content
                 p.text-center.error-message #{message}
         div.signup-wall.account-home
             div.table-wrap
-                table.user-details
-                    tbody
-                        tr
-                            td Username: 
-                            td #{user.username}
-                        tr
-                            td Member since:
-                            td #{moment(user.createdDate).format("MMMM Do YYYY")}
+                div.user-details
+                    div.group 
+                        div.label Username: 
+                        div.value #{user.username}
+                    div.group 
+                        div.label Member since:
+                        div.value #{moment(user.createdDate).format("MMMM Do YYYY")}
 
             div.account-footer
                 div

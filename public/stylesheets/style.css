@@ -1,6 +1,6 @@
 
 body {
-  padding: 50px;
+  padding: 30px 15px;
 }
 
 a {
@@ -21,6 +21,10 @@ h1 {
 footer {
     padding-top: 10px;
     text-align: center;
+}
+
+td {
+    word-wrap: break-word;
 }
 
 .col-centered {
@@ -130,24 +134,26 @@ p.error-message {
 .table-wrap {
     padding: 0 10px;
 }
-table.user-details {
-    width: 100%;
-    margin: 20px 0 0 0;
-}
-table.user-details tr td:first-child {
-    text-align: right;
-    padding: 6px 12px 6px 6px;
-}
-table.user-details tr td {
+.user-details {
+    padding: 10px 0 0 0;
     text-align: left;
+}
+.user-details .group {
+    padding: 0 0 10px 0;
+}
+.user-details .label {
+    font-weight: 100;
+}
+.user-details .value {
+    font-weight: 600;
 }
 .account-footer {
     position: relative;
-    padding-top: 16px;
+    padding-top: 0px;
 }
 .account-home .account-footer {
     text-align: center;
-    padding: 16px 10px 0 10px;
+    padding: 0px 10px 0 10px;
 }
 .account-footer a {
     display: inline-block;
