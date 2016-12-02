@@ -144,6 +144,10 @@ module.exports = function (passport) {
         res.render('TOS');
     });
 
+    router.get('/privacy-policy', function (req, res) {
+        res.redirect('privacy-policy');
+    });
+
 
     /** 
      * API 

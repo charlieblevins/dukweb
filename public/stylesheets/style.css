@@ -17,6 +17,12 @@ h1 {
     font-weight: 400;
     display: block;
 }
+
+footer {
+    padding-top: 10px;
+    text-align: center;
+}
+
 .col-centered {
     display: block;
     margin: 0 auto;
