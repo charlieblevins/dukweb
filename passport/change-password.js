@@ -1,6 +1,7 @@
 var user_models = require('../models/user');
 var User = user_models.User;
 var bCrypt = require('bcrypt-nodejs');
+var passFeedback = require('./pass-feedback.js');
 
 module.exports = function (req, res, next) {
 
@@ -23,6 +24,13 @@ module.exports = function (req, res, next) {
             var msg = 'Passwords do not match.';
             console.log(msg);
             return res.render('change-password', {message: msg});
+        }
+
+        var pass_feedback = passFeedback(req.body['confirm-pass']);
+        if (pass_feedback) {
+            console.dir(pass_feedback);
+
+            return res.render('change-password', {message: pass_feedback});
         }
         
         user.password = createHash(req.body['new-password']);

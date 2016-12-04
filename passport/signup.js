@@ -24,15 +24,14 @@ module.exports = function (passport) {
                 return done(err);
             }
 
-            var pass_feedback = passFeedback(password);
-
             // already exists
             if (user) {
                 console.log('User already exists with username: ' + username);
                 return done(null, false, req.flash('message', 'User already exists'));
-
-            // Require score > 2
-            } else if (pass_feedback) {
+            }
+            
+            var pass_feedback = passFeedback(password);
+            if (pass_feedback) {
                 console.dir(pass_feedback);
 
                 // Pass back entered values

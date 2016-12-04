@@ -13,9 +13,9 @@ module.exports = function passFeedback (password) {
 
     if (!strength.feedback || strength.score === undefined) return 'Invalid password';
 
-    // password secure
-    console.log('password score: ' + strength.score);
-    if (strength.score > 1) return false;
+    // password. 30000 is arbitrary number
+    console.log('password guesses estimate: ' + strength.guesses);
+    if (strength.guesses > 30000) return false;
 
     // Add warning if exists
     msg += (strength.feedback.warning) ? strength.feedback.warning + '. ' : '';
