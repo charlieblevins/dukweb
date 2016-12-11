@@ -2,14 +2,9 @@ var request = require('request');
 var fs = require('fs');
 
 // Remove trail icons
-del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/trail.png');
-del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/trail@2x.png');
-del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/trail@3x.png');
-
-// Remove hill icons
-del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/hill.png');
-del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/hill@2x.png');
-del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/hill@3x.png');
+del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/creek.png');
+del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/creek@2x.png');
+del_if_exists('/Users/charlieblevins/Sites/duckmap.com/public/icons/creek@3x.png');
 
 function del_if_exists(path) {
 
@@ -20,9 +15,14 @@ function del_if_exists(path) {
     }
 }
 
-['trail', 'mountain', 'lake', 'hill', 'creek'].forEach(function (noun) {
+var auth = "Basic " + new Buffer('blevins.charlie@gmail.com:eilrahC#*').toString('base64');
 
-    request('http://localhost:3000/icon/' + noun + '@3x.png', function (err, res, body) {
+['creek'].forEach(function (noun) {
+
+    request({
+        url: 'http://localhost:3000/icon/' + noun + '@3x.png',
+        headers: {"Authorization": auth}
+    }, function (err, res, body) {
         if (err) throw err;
 
         console.log('res 1: ' + res);

@@ -183,5 +183,10 @@ module.exports = function (passport) {
     router.route('/icon/:noun')
         .get(icon_generator.generate, icon_generator.send);
 
+    router.route('/icons').get(function (req, res) {
+        res.status(403);
+        res.end();
+    });
+
     return router;    
 }

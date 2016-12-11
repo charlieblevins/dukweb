@@ -4,7 +4,7 @@ var NounProject = require('the-noun-project'),
         secret: '61021a64c5b748d6ba02e6e22a143098'
     });
 
-nounProject.getIconsByTerm('dog', {limit: 1}, function (err, data) {
+nounProject.getIconsByTerm('dog', {limit: 5}, function (err, data) {
 
     if (err) {
         throw new Error('Error communicating with noun project: ' + err); 

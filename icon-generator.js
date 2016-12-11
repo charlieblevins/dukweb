@@ -20,6 +20,9 @@ var PNG = require('pngjs').PNG;
 var gm = require('gm').subClass({imageMagick: true});
 
 var request = require('request');
+var IconData = require('./models/icon.js');
+var IconBlacklist = require('./models/icon_blacklist.js');
+var private_key = 'b185052862d41f43b2e3ffb06ed8b335';
 
 
 module.exports = {
@@ -30,7 +33,25 @@ module.exports = {
         var icon_path,
             requested_noun,
             requested_size,
-            icon_num;
+            icon_num,
+            attribution;
+
+        // Require private key
+        if (req.query.key !== private_key) {
+            console.log('private key not found');
+            res.status(403); 
+            return res.end();
+        }
+
+        if (!req.params.noun) {
+            console.log('No noun passed with icon request');
+            res.status(404); 
+            return res.end();
+        }
+
+        // Get noun by removing size and .png extension. turtle@2x.png -> turtle
+        requested_noun = req.params.noun.replace(/@(.*)|.png/gi, '');
+        requested_noun = requested_noun.toLowerCase();
 
         // Check if icon is already cached (generated)
         // and if so, return it
@@ -38,13 +59,15 @@ module.exports = {
         console.log('checking for icon in: ' + req.icon_path);
 
         FS.isFile(req.icon_path)
-            .then(function (exists) {
+
+            // Check cache and blacklist
+            .then(function (file_exists) {
 
                 var def = Q.defer();
                 
                 // File for this noun exists
-                if (exists) {
-                    def.reject('File exists');
+                if (file_exists) {
+                    def.reject('Returning icon from cache');
                     next();
 
                     // Return promise to prevent further execution 
@@ -55,15 +78,31 @@ module.exports = {
                 requested_size = req.params.noun.match(/@(.*[2,3]x)/gi);
                 requested_size = (requested_size && requested_size.length) ? requested_size[0].toLowerCase() : '';
 
+                is_allowed(requested_noun).then(function (allowed) {
+                    if (allowed === true) {
+                        def.resolve();
+
+                    } else if (allowed === false) {
+                        def.reject('Icon found in blacklist');
+                        req.icon_path = appRoot + '/public/icons/banned' + requested_size + '.png';
+
+                        // Next middleware
+                        next();
+                    }
+                });
+
+                return def.promise;
+
+            // Get from noun project
+            }).then(function () {
+                var def = Q.defer();
+
                 // Allow query param to specify which icon 
                 // is selected from noun project
                 icon_num = parseInt(req.query.icon);
 
                 // Limit to 20th result
                 icon_num = (icon_num && icon_num < 21 && icon_num > 0) ? icon_num : 1;
-
-                // Get noun by removing size and .png extension. turtle@2x.png -> turtle
-                requested_noun = req.params.noun.replace(/@(.*)|.png/gi, '');
 
                 // Call to noun project and 
                 // retrieve first result
@@ -107,6 +146,9 @@ module.exports = {
 
             }).then(function (icon_data) {
                 var def = Q.defer();
+
+                // Store attribution for illustrator credit page
+                attribution = icon_data.attribution;
 
                 // GET png from noun project
                 console.log('GETting ' + icon_data.preview_url);
@@ -159,9 +201,14 @@ module.exports = {
                 // Save 3 sizes for iphone
                 return write_3_sizes(comp_file, requested_noun);
 
-            // Let express next() move to send stage
+            // Save and continue
             }).then(function () {
                 console.log('3 images written');
+
+                // Save icon meta data
+                save_icon_data(requested_noun, req.icon_path, attribution);
+
+                // Let express next() move to send stage
                 next();
             })
 
@@ -184,7 +231,6 @@ module.exports = {
             console.log('Sent: ' + req.icon_path);
 
         });
-
     }
 
 }
@@ -293,6 +339,66 @@ function resize (full_img, new_size, new_name) {
         console.log(new_file + ' write successful');
 
         def.resolve();
+    });
+
+    return def.promise;
+}
+
+function save_icon_data (noun, filepath, attribution) {
+    console.log(noun, filepath, attribution);
+    
+    var icon = new IconData();
+
+    icon.tag = noun;
+    icon.iconPath = filepath;
+    icon.attribution = attribution;
+
+    icon.save((err) => {
+
+        if (err) {
+            console.log('Error saving icon: ', icon);
+            return;
+        }
+
+        console.log('Icon saved successfully: ', icon);
+    });
+}
+
+function lookup_icon (noun) {
+    var def = Q.defer();
+    
+    IconData.findOne({'noun': noun}, function (err, icon) {
+        if (err) {
+            console.log(err);
+            def.resolve(false);
+        }
+
+        if (!icon) {
+            def.resolve(false);
+        }
+
+        def.resolve(icon);
+    });
+
+    return def;
+}
+
+function is_allowed (noun) {
+    var def = Q.defer();
+    
+    IconBlacklist.findOne({'noun': noun}, function (err, icon) {
+        if (err) {
+            console.log(err);
+            return def.reject(err);
+        }
+
+        // Icon not found - assume allowed
+        if (!icon) {
+            return def.resolve(true);
+        }
+
+        // Icon found in blacklist
+        def.resolve(false);
     });
 
     return def.promise;
