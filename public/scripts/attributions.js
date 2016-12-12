@@ -19,12 +19,26 @@
 
     function load (url, callback) {
         var xhr = new XMLHttpRequest(),
-            json = '{"test": 1}';
+            json;
 
-        callback(json);
+        xhr.onreadystatechange = xhrHandler.bind(xhr, callback);
+
+        xhr.open('GET', url, true);
+        xhr.send('');
     }
 
-    function xhrHandler () {
+    function xhrHandler (callback) {
+        if (this.readyState < 4) {
+            return;
+        }
+
+        if (this.status !== 200) {
+            return;
+        }
+
+        if (this.readyState === 4) {
+            callback(this.response);
+        }
     }
 
     function jsonHandler (noun, json) {
@@ -45,11 +59,12 @@
         }
 
         var img = document.createElement('img');
-        img.src = data.imagePath;
+        img.src = '/icons/' + noun + '@3x.png';
         container.append(img);
 
         var attrib = document.createElement('caption');
-        attrib.innerText = ;
+        attrib.innerText = data.attribution;
+        container.append(attrib);
     }
 
     bind();

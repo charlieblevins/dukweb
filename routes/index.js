@@ -189,11 +189,8 @@ module.exports = function (passport) {
             res.render('icon-attributions', {iconNouns: req.iconNouns});
         });
 
-    // Reject requests to this directory
-    router.route('/icons').get(function (req, res) {
-        res.status(403);
-        res.end();
-    });
+    router.route('/icon-attributions/:noun')
+        .get(icon_attributions.getSingle);
 
     return router;    
 }
