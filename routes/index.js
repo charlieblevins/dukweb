@@ -9,6 +9,7 @@ var delete_account = require('../passport/delete-account.js');
 var resend_code = require('../passport/resend-code.js');
 var change_password = require('../passport/change-password.js');
 var help_message = require('../passport/help.js');
+var icon_attributions = require('../passport/icon-attributions.js');
 
 
 var isAuthenticated = function (req, res, next) {
@@ -183,6 +184,12 @@ module.exports = function (passport) {
     router.route('/icon/:noun')
         .get(icon_generator.generate, icon_generator.send);
 
+    router.route('/icon-attributions')
+        .get(icon_attributions.getNounList, function (req, res) {
+            res.render('icon-attributions', {iconNouns: req.iconNouns});
+        });
+
+    // Reject requests to this directory
     router.route('/icons').get(function (req, res) {
         res.status(403);
         res.end();
