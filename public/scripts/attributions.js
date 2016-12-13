@@ -11,7 +11,12 @@
     function get_attrib_json (e) {
         var li = e.currentTarget;
         var noun = li.id;
-        console.log('get ' + noun);
+
+        // If already open - close and quit
+        var fig = li.getElementsByTagName('figure');
+        if (fig.length) {
+            return fig[0].remove();
+        }
 
         var url = '/icon-attributions/' + noun;
         load(url, jsonHandler.bind(null, noun));
@@ -56,15 +61,20 @@
             var data = JSON.parse(json);
         } catch (e) {
             console.log('could not parse json: ' + json);
+            return;
         }
+
+        // figure
+        var fig = document.createElement('figure');
+        container.append(fig);
 
         var img = document.createElement('img');
         img.src = '/icons/' + noun + '@3x.png';
-        container.append(img);
+        fig.append(img);
 
-        var attrib = document.createElement('caption');
+        var attrib = document.createElement('figcaption');
         attrib.innerText = data.attribution;
-        container.append(attrib);
+        fig.append(attrib);
     }
 
     bind();
