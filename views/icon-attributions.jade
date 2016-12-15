@@ -2,13 +2,13 @@ extends layout
 
 block content
     h1.text-center Icon Attributions 
-    div.account-wall
+    div.account-wall.icon-attrs
         p Duk icons are made by the artists of the Noun Project.
         p.instructions Tap or click a noun to see it's icon and artist attribution.
         ul
-        - each noun in iconNouns
-            li(id="#{noun}", class="attribution")
-                button #{noun}
+            - each noun in iconNouns
+                li(id="#{noun}", class="attribution")
+                    button.btn-link #{noun}
 
     script(src="/scripts/attributions.js")
          

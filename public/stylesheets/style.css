@@ -27,6 +27,16 @@ td {
     word-wrap: break-word;
 }
 
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style: none;
+    text-align: left;
+}
+
 .col-centered {
     display: block;
     margin: 0 auto;
@@ -175,4 +185,10 @@ input[name="confirm-check"] + span {
 }
 button.confirm-delete {
     margin-top: 20px;
+}
+
+.icon-attrs {
+    box-sizing: border-box;
+    padding: 12px;
+    text-align: left;
 }
