@@ -7,7 +7,7 @@ block content
         form(class='form-code-entry', action='/code-entry', method='POST')
             div.form-group
                 label Verification Code
-                input(type='number', name='code', class='form-control', placeholder='',required)
+                input(type='tel', patter="[0-9]*", name='code', class='form-control', placeholder='',required)
 
             #message
                 if message
