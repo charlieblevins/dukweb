@@ -1,7 +1,14 @@
 var mongoose = require('mongoose');
 
 var schema = mongoose.Schema({
-    noun: String,
+    noun: {
+        type: String,
+        index: {
+            unique: true,
+            sparse: true,
+            dropDups: true
+        }
+    },
     createdDate: { type: Date, default: Date.now } 
 });
 
