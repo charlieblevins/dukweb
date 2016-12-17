@@ -4,7 +4,7 @@ module.exports = {
 
     getNounList: function (req, res, next) {
         
-        Icon.find({}, 'tag -_id', (err, icons) => {
+        Icon.find({}, 'tag -_id', {sort: {tag: 1}}, (err, icons) => {
             if (err) {
                 res.status(500);
                 console.log(err);
