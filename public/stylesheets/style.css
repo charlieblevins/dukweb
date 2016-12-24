@@ -192,3 +192,11 @@ button.confirm-delete {
     padding: 12px;
     text-align: left;
 }
+
+/* Marker Admin */
+.marker-admin #tags {
+    font-weight: bold;
+}
+.marker-admin #map {
+    height: 400px;
+}

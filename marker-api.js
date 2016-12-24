@@ -27,7 +27,7 @@ function parse_marker_post (req, res) {
         image_hash,
         form_load;
 
-	console.log('parse marker post');
+    console.log('parse marker post');
     // Parse form data
     var form = new formidable.IncomingForm();
     form.uploadDir = __dirname + '/public/photos/';
@@ -265,6 +265,32 @@ function get_photo_b64 (marker_id, size) {
         b64_data = data_buffer.toString('base64');
         def.resolve(b64_data);
     });
+
+    return def.promise;
+}
+
+/**
+ * Returns Q promise
+ */
+function latest_marker_unapproved () {
+    var def = Q.defer();
+
+    Marker
+        .find({ "approved": false })
+        .sort({"createdDate": -1})
+        .limit(1)
+        .exec(function (err, marker) {
+            if (err)
+                return def.reject({'message': 'An internal error occurred', 'status': 500});
+
+            if (!marker || !marker[0])
+                return def.reject({'status': 404, message: 'No marker was found'});
+
+            // Build return data
+            returnData = marker[0];
+
+            def.resolve(returnData);
+        });
 
     return def.promise;
 }
@@ -537,6 +563,18 @@ module.exports = {
                 data: returnData
             });
         });
+    },
+
+    admin: {
+        markerUnapproved: function (req, res) {
+            latest_marker_unapproved().then((data) => {
+                res.json({message: 'success', data: data});
+            }, (errData) => {
+                res.json({message: 'failure', data: errData});
+            });
+        },
+        markerById: function (req, res) {
+        }
     }
 }
 

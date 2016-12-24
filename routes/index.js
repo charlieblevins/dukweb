@@ -179,6 +179,12 @@ module.exports = function (passport) {
     router.route('/api/markersNear/')
         .get(marker_api.getMarkersNear);
 
+    // Admin api
+    router.route('/api/admin/marker-unapproved')
+        .get(marker_api.admin.markerUnapproved);
+    router.route('/api/admin/marker-by-id')
+        .get(marker_api.admin.markerById);
+
 
     // Icon Generator
     router.route('/icon/:noun')
@@ -191,6 +197,21 @@ module.exports = function (passport) {
 
     router.route('/icon-attributions/:noun')
         .get(icon_attributions.getSingle);
+
+    router.route('/a071786')
+        .get(basicOrLocalAuth,
+            // Ensure admin
+            function (req, res, next) {
+                if (!req.user.isAdmin) {
+                    res.redirect('/home');
+                }
+                next();
+            },
+            // Get marker data, pass to view
+            function (req, res) {
+                res.render('admin_markers');
+            }
+        );
 
     return router;    
 }

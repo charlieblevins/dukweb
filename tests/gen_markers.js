@@ -2,7 +2,7 @@
  * Generate marker data and insert all into markers 
  */
 
-var Marker = require('../models/marker.js'),
+var Marker = require('../models/marker.js').Marker,
 
     Range = function (min, max) {
         this.min = min;
@@ -46,7 +46,7 @@ for (var i = 0; i < 5000; i++) {
 
     var rand_coord = new Coord(rand_lat, rand_lng);
 
-    var marker = {};
+    var marker = new Marker();
 
     marker.geometry = {
         "type": "Point",
@@ -60,10 +60,11 @@ for (var i = 0; i < 5000; i++) {
     // User: cbradio@gmail.com
     marker.user_id = ObjectId("57692ef0d21e626a3f499470");
 
-    // River photo?
-    //marker.photo_hash = "577669835d3c16934000e0ee";
+    // swamp photo 
+    // cannot insert hash because of duplicate key rule
+    //marker.photo_hash = "57fe2e2470257ba30c3732d1";
 
-    marker_arr.push(marker);
+    marker_arr.push(marker.toObject());
 }
 
 

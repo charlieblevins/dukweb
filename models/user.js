@@ -8,6 +8,7 @@ var user = {
         expiration: { type: Date },
         verified: Boolean
     },
+    isAdmin: { type: Boolean, default: false },
     createdDate: { type: Date, default: Date.now } 
 };
 

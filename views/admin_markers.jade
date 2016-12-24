@@ -1,0 +1,44 @@
+extends layout
+
+block content
+    #marker
+        h1.text-center.login-title Duk Admin
+        #message
+            if message
+                p.text-center.error-message #{message}
+        div.account-home.marker-admin
+            div.info-container
+                span Image (medium)
+                img(id="img")
+            div.info-container
+                span Icon(s) 
+                div(id="icons")
+            div.info-container
+                span Tags (nouns) 
+                div(id="tags")
+            div.info-container
+                span Map 
+                div(id="map")
+            div.info-container
+                span User: 
+                div(id="username")
+            div.info-container
+                span Approval Status: 
+                div(id="approval")
+            form
+                button(id="approve")
+                button(id="deny")
+                textarea(id="deny_reason")
+
+            div.account-footer
+                div
+                    a(href='/change-password', class='change-password') Change Password
+                div
+                    a(href='/delete-account', class='delete-account text-center') Delete Account
+                div
+                    a(href='/help', class='help-request text-center') Get Help 
+                div
+                    a(href='/signout', class='sign-out') Sign Out
+
+    script(src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpIwL8mHgn_5AAjsaTX0eHN5EFB2DFTkk")
+    script(src="/scripts/admin.js")
