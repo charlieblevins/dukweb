@@ -61,6 +61,13 @@
         } else {
             console.log('No coordinates received');
         }
+
+        // User
+        if (data.user_info) {
+            show_user(data.user_info);
+        } else {
+            console.log('No coordinates received');
+        }
     }
 
     function load_img (photo_hash) {
@@ -112,6 +119,18 @@
             position: latLng,
             map: map
         });
+    }
+
+    function show_user (user_info) {
+        var username_elem,
+            signup_elem;
+
+        if (!user_info) return false;
+
+        username_elem = document.getElementById('username');
+        username_elem.innerText = user_info.username;
+        signup_elem = document.getElementById('user_signup');
+        signup_elem.innerText = user_info.createdDate;
     }
 
     get_marker_json();

@@ -10,7 +10,8 @@ var models = require('./models/marker.js'),
     crypto = require('crypto'),
     Q = require('q'),
 	mongoose = require('mongoose'),
-	ObjectId = mongoose.Types.ObjectId;
+	ObjectId = mongoose.Types.ObjectId,
+    moment = require('moment');
 
 
 // Private functions
@@ -276,9 +277,34 @@ function latest_marker_unapproved () {
     var def = Q.defer();
 
     Marker
-        .find({ "approved": false })
-        .sort({"createdDate": -1})
-        .limit(1)
+        .aggregate([
+
+            // Find marker by id
+            { "$match" : {'approved': false } },
+
+            { "$sort" : {"createdDate": -1 } },
+
+            { "$limit" : 1 },
+            // Join username from users collection
+            { "$lookup" : { 
+                "from" : "users",
+                "localField" : "user_id",
+                "foreignField" : "_id",
+                "as" : "user_info" }
+            },
+
+            // Project (filter) only necessary fields
+            { "$project" : {
+                "_id" : 1,
+                "createdDate" : 1,
+                "approved" : 1,
+                "tags" : 1,
+                "photo_hash" : 1,
+                "geometry" : 1,
+                "user_info.username" : 1,
+                "user_info.createdDate" : 1
+            }}
+        ])
         .exec(function (err, marker) {
             if (err)
                 return def.reject({'message': 'An internal error occurred', 'status': 500});
@@ -288,6 +314,11 @@ function latest_marker_unapproved () {
 
             // Build return data
             returnData = marker[0];
+
+            // make user_info an obj, not array
+            var user_info = marker[0].user_info[0];
+            user_info.createdDate = moment(user_info.createdDate).format("MMMM Do YYYY H:mm A");
+            returnData.user_info = user_info;
 
             def.resolve(returnData);
         });
