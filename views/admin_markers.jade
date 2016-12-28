@@ -29,9 +29,11 @@ block content
                 span Approval Status: 
                 div(id="approval")
             form
-                button(id="approve")
-                button(id="deny")
-                textarea(id="deny_reason")
+                button(id="approve") Approve
+                button(id="deny") Deny
+                div
+                    label(for="deny_reason") Reason for denial
+                    textarea(id="deny_reason")
 
             div.account-footer
                 div

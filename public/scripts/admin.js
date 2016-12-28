@@ -68,6 +68,13 @@
         } else {
             console.log('No coordinates received');
         }
+
+        // Approval Status 
+        if (data.approved !== undefined) {
+            show_status(data.approved);
+        } else {
+            console.log('No approval status received');
+        }
     }
 
     function load_img (photo_hash) {
@@ -131,6 +138,12 @@
         username_elem.innerText = user_info.username;
         signup_elem = document.getElementById('user_signup');
         signup_elem.innerText = user_info.createdDate;
+    }
+
+    function show_status (stat) {
+        var div = document.getElementById('approval');
+        if (!div) return false;
+        div.innerText = stat.toLocaleString();
     }
 
     get_marker_json();
