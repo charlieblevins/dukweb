@@ -19,7 +19,7 @@ var base = {
 
     // Must be unique, will drop duplicates, allow sparse (multiple null IS allowed)
     photo_hash: {type: String, index: {unique: true, dropDups: true, sparse: true}},
-    approved: {type: Boolean, default: false},
+    approved: {type: Number, default: 0},
     user_id: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'

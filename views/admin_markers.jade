@@ -8,6 +8,9 @@ block content
                 p.text-center.error-message #{message}
         div.account-home.marker-admin
             div.info-container
+                span Marker ID:
+                span(id="id_display")
+            div.info-container
                 span Image (medium)
                 img(id="img")
             div.info-container
@@ -28,12 +31,10 @@ block content
             div.info-container
                 span Approval Status: 
                 div(id="approval")
-            form
+            form(id="set_approval", action="#")
+                input(id="marker_id", type="hidden")
                 button(id="approve") Approve
                 button(id="deny") Deny
-                div
-                    label(for="deny_reason") Reason for denial
-                    textarea(id="deny_reason")
 
             div.account-footer
                 div

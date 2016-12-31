@@ -29,6 +29,9 @@
         }
     }
 
+    /**
+     * Receive json data and inject in view
+     */
     function jsonHandler (json) {
         var data;
 
@@ -74,6 +77,13 @@
             show_status(data.approved);
         } else {
             console.log('No approval status received');
+        }
+
+        // Set marker id to display AND approval form
+        if (data._id !== undefined) {
+            set_marker_id(data._id);
+        } else {
+            console.log('no marker id received');
         }
     }
 
@@ -146,5 +156,65 @@
         div.innerText = stat.toLocaleString();
     }
 
+    function set_marker_id (id) {
+        if (!id) return false;
+        var input = document.getElementById('marker_id');
+        input.value = id;
+        var display = document.getElementById('id_display');
+        display.innerText = id;
+    }
+
+    /**
+     * Send approval update request to server
+     * @param approved {bool} - true for approved, false for deny
+     */
+    function update_approval (approved, e) {
+        e.preventDefault();
+
+        // gather approval, marker_id, and reason
+        var data = {
+            'approved': approved,
+            'marker_id': document.getElementById('marker_id').value
+        };
+
+        if (data.approved === undefined) {
+            return alert('Cannot send. Missing approval data');
+        }
+
+        if (data.marker_id === undefined) {
+            return alert('Cannot send. Missing marker id');
+        }
+
+        // ajax post
+        var http = new XMLHttpRequest();
+        var url = '/api/admin/set-approval';
+        var params = 'approved=' + data.approved + '&marker_id=' + data.marker_id;
+
+        http.open('POST', url, true);
+
+        //Send the proper header information along with the request
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+        http.onreadystatechange = function() {//Call a function when the state changes.
+            if(http.readyState == 4) {
+
+                // Load next marker on success
+                if (http.status === 200) {
+                    get_marker_json();
+                } else {
+                    alert(http.responseText);
+                }
+            }
+        }
+        http.send(params);
+    }
+
     get_marker_json();
+
+    // Listen to clicks on approve/deny
+    var approve = document.getElementById('approve');
+    approve.addEventListener('click', update_approval.bind(null, true));
+
+    var deny = document.getElementById('deny');
+    deny.addEventListener('click', update_approval.bind(null, false));
 })();

@@ -37,6 +37,14 @@ module.exports = function (passport) {
         }
     };
 
+    var isAdmin = function (req, res, next) {
+
+        if (!req.user.isAdmin) {
+            res.redirect('/home');
+        }
+        next();
+    };
+
     /* GET home page. */
     router.get('/', function(req, res, next) {
         res.render('index', { message: req.flash('message') });
@@ -181,9 +189,11 @@ module.exports = function (passport) {
 
     // Admin api
     router.route('/api/admin/marker-unapproved')
-        .get(marker_api.admin.markerUnapproved);
+        .get(basicOrLocalAuth, isAdmin, marker_api.admin.markerUnapproved);
     router.route('/api/admin/marker-by-id')
-        .get(marker_api.admin.markerById);
+        .get(basicOrLocalAuth, isAdmin, marker_api.admin.markerById);
+    router.route('/api/admin/set-approval')
+        .post(basicOrLocalAuth, isAdmin, marker_api.admin.setApproval);
 
 
     // Icon Generator

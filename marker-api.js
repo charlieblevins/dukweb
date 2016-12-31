@@ -605,6 +605,44 @@ module.exports = {
             });
         },
         markerById: function (req, res) {
+        },
+        setApproval: function (req, res) {
+            var approved = req.body.approved,
+                marker_id = req.body.marker_id;
+
+            // Only tags are editable for now
+            if (approved === undefined) {
+                return res.status(422).json({message: 'No approval status received.'});
+            }
+
+            // Update marker data
+            Marker.findOne({'_id': marker_id}, function (err, marker) {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).json({message: 'An internal error occurred'});
+                }
+
+                if (!marker)
+                    return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
+
+                // Make sure user is authorized to see/edit this marker
+                if (!marker.user_id.equals(req.user._id)) {
+                    return res.status(403).json({message: 'You are not authorized to view this marker'});
+                }
+
+                marker.approved = (approved === 'true');
+
+                marker.save(function (err) {
+                    if (err) {
+                        res.json({message: 'An internal error occurred'});
+                    }
+
+                    res.status(200).json({
+                        message: marker._id + ' updated successfully',
+                        approved: marker.approved 
+                    });
+                });
+            }); // end update
         }
     }
 }
