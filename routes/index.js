@@ -37,6 +37,14 @@ module.exports = function (passport) {
         }
     };
 
+    var isAdmin = function (req, res, next) {
+
+        if (!req.user.isAdmin) {
+            res.redirect('/home');
+        }
+        next();
+    };
+
     /* GET home page. */
     router.get('/', function(req, res, next) {
         res.render('index', { message: req.flash('message') });
@@ -179,6 +187,14 @@ module.exports = function (passport) {
     router.route('/api/markersNear/')
         .get(marker_api.getMarkersNear);
 
+    // Admin api
+    router.route('/api/admin/marker-unapproved')
+        .get(basicOrLocalAuth, isAdmin, marker_api.admin.markerUnapproved);
+    router.route('/api/admin/marker-by-id')
+        .get(basicOrLocalAuth, isAdmin, marker_api.admin.markerById);
+    router.route('/api/admin/set-approval')
+        .post(basicOrLocalAuth, isAdmin, marker_api.admin.setApproval);
+
 
     // Icon Generator
     router.route('/icon/:noun')
@@ -191,6 +207,21 @@ module.exports = function (passport) {
 
     router.route('/icon-attributions/:noun')
         .get(icon_attributions.getSingle);
+
+    router.route('/a071786')
+        .get(basicOrLocalAuth,
+            // Ensure admin
+            function (req, res, next) {
+                if (!req.user.isAdmin) {
+                    res.redirect('/home');
+                }
+                next();
+            },
+            // Get marker data, pass to view
+            function (req, res) {
+                res.render('admin_markers');
+            }
+        );
 
     return router;    
 }

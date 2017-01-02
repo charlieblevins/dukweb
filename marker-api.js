@@ -10,7 +10,8 @@ var models = require('./models/marker.js'),
     crypto = require('crypto'),
     Q = require('q'),
 	mongoose = require('mongoose'),
-	ObjectId = mongoose.Types.ObjectId;
+	ObjectId = mongoose.Types.ObjectId,
+    moment = require('moment');
 
 
 // Private functions
@@ -27,7 +28,7 @@ function parse_marker_post (req, res) {
         image_hash,
         form_load;
 
-	console.log('parse marker post');
+    console.log('parse marker post');
     // Parse form data
     var form = new formidable.IncomingForm();
     form.uploadDir = __dirname + '/public/photos/';
@@ -265,6 +266,62 @@ function get_photo_b64 (marker_id, size) {
         b64_data = data_buffer.toString('base64');
         def.resolve(b64_data);
     });
+
+    return def.promise;
+}
+
+/**
+ * Returns Q promise
+ */
+function latest_marker_unapproved () {
+    var def = Q.defer();
+
+    Marker
+        .aggregate([
+
+            // Find marker by id
+            { "$match" : {'approved': 0 } },
+
+            { "$sort" : {"createdDate": -1 } },
+
+            { "$limit" : 1 },
+            // Join username from users collection
+            { "$lookup" : { 
+                "from" : "users",
+                "localField" : "user_id",
+                "foreignField" : "_id",
+                "as" : "user_info" }
+            },
+
+            // Project (filter) only necessary fields
+            { "$project" : {
+                "_id" : 1,
+                "createdDate" : 1,
+                "approved" : 1,
+                "tags" : 1,
+                "photo_hash" : 1,
+                "geometry" : 1,
+                "user_info.username" : 1,
+                "user_info.createdDate" : 1
+            }}
+        ])
+        .exec(function (err, marker) {
+            if (err)
+                return def.reject({'message': 'An internal error occurred', 'status': 500});
+
+            if (!marker || !marker[0])
+                return def.reject({'status': 404, message: 'No marker was found'});
+
+            // Build return data
+            returnData = marker[0];
+
+            // make user_info an obj, not array
+            var user_info = marker[0].user_info[0];
+            user_info.createdDate = moment(user_info.createdDate).format("MMMM Do YYYY H:mm A");
+            returnData.user_info = user_info;
+
+            def.resolve(returnData);
+        });
 
     return def.promise;
 }
@@ -537,6 +594,56 @@ module.exports = {
                 data: returnData
             });
         });
+    },
+
+    admin: {
+        markerUnapproved: function (req, res) {
+            latest_marker_unapproved().then((data) => {
+                res.json({message: 'success', data: data});
+            }, (errData) => {
+                res.json({message: 'failure', data: errData});
+            });
+        },
+        markerById: function (req, res) {
+        },
+        setApproval: function (req, res) {
+            var approved = req.body.approved,
+                marker_id = req.body.marker_id;
+
+            // Only tags are editable for now
+            if (approved === undefined) {
+                return res.status(422).json({message: 'No approval status received.'});
+            }
+
+            // Update marker data
+            Marker.findOne({'_id': marker_id}, function (err, marker) {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).json({message: 'An internal error occurred'});
+                }
+
+                if (!marker)
+                    return res.status(404).json({message: 'No marker was found with id ' + req.query.marker_id});
+
+                // Make sure user is authorized to see/edit this marker
+                if (!marker.user_id.equals(req.user._id)) {
+                    return res.status(403).json({message: 'You are not authorized to view this marker'});
+                }
+
+                marker.approved = approved;
+
+                marker.save(function (err) {
+                    if (err) {
+                        res.json({message: 'An internal error occurred'});
+                    }
+
+                    res.status(200).json({
+                        message: marker._id + ' updated successfully',
+                        approved: marker.approved 
+                    });
+                });
+            }); // end update
+        }
     }
 }
 

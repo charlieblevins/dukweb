@@ -192,3 +192,30 @@ button.confirm-delete {
     padding: 12px;
     text-align: left;
 }
+
+/* Marker Admin */
+.marker-admin #img {
+    width: 100%;
+}
+.marker-admin #tags {
+    font-weight: bold;
+}
+.marker-admin #map {
+    height: 400px;
+}
+.marker-admin form {
+    margin-top: 20px;
+}
+label[for="deny_reason"] {
+    display: block;
+}
+#deny_reason {
+    display: block;
+    width: 100%;
+}
+
+@media (min-width: 1000px) {
+    .col-centered {
+        max-width: 500px;
+    }
+}
