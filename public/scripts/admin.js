@@ -94,6 +94,10 @@
 
     function load_icons (tags) {
         var icons_container = document.getElementById('icons');
+
+        if (!icons_container) return false;
+
+        icons_container.innerHtml = '';
         
         if (!tags || !tags.length) return false;
 
@@ -153,7 +157,20 @@
     function show_status (stat) {
         var div = document.getElementById('approval');
         if (!div) return false;
-        div.innerText = stat.toLocaleString();
+
+        switch(parseInt(stat, 10)) {
+            case -1:
+                div.innerText = 'Denied';
+            break;
+
+            case 0:
+                div.innerText = 'Pending Approval';
+            break;
+              
+            case 1:
+                div.innerText = 'Approved';
+            break;
+        }
     }
 
     function set_marker_id (id) {
@@ -213,8 +230,8 @@
 
     // Listen to clicks on approve/deny
     var approve = document.getElementById('approve');
-    approve.addEventListener('click', update_approval.bind(null, true));
+    approve.addEventListener('click', update_approval.bind(null, 1));
 
     var deny = document.getElementById('deny');
-    deny.addEventListener('click', update_approval.bind(null, false));
+    deny.addEventListener('click', update_approval.bind(null, -1));
 })();

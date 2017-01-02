@@ -280,7 +280,7 @@ function latest_marker_unapproved () {
         .aggregate([
 
             // Find marker by id
-            { "$match" : {'approved': false } },
+            { "$match" : {'approved': 0 } },
 
             { "$sort" : {"createdDate": -1 } },
 
@@ -630,7 +630,7 @@ module.exports = {
                     return res.status(403).json({message: 'You are not authorized to view this marker'});
                 }
 
-                marker.approved = (approved === 'true');
+                marker.approved = approved;
 
                 marker.save(function (err) {
                     if (err) {
