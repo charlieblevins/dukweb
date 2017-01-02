@@ -43,13 +43,6 @@
             return console.log('Failed to parse JSON: ' + e);
         }
 
-        // Photo
-        if (data.photo_hash) {
-            load_img(data.photo_hash);
-        } else {
-            console.log('No photo hash received with this marker');
-        }
-
         // Tags & Icons
         if (data.tags) {
             load_icons(data.tags);
@@ -82,14 +75,15 @@
         // Set marker id to display AND approval form
         if (data._id !== undefined) {
             set_marker_id(data._id);
+            load_img(data._id);
         } else {
             console.log('no marker id received');
         }
     }
 
-    function load_img (photo_hash) {
+    function load_img (id) {
         var img_node = document.getElementById('img');
-        img_node.src = '/photos/' + photo_hash + '_md.jpg';
+        img_node.src = '/photos/' + id + '_md.jpg';
     }
 
     function load_icons (tags) {
@@ -97,7 +91,7 @@
 
         if (!icons_container) return false;
 
-        icons_container.innerHtml = '';
+        icons_container.innerHTML = '';
         
         if (!tags || !tags.length) return false;
 
