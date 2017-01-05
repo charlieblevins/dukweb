@@ -187,6 +187,10 @@ module.exports = function (passport) {
     router.route('/api/markersNear/')
         .get(marker_api.getMarkersNear);
 
+    // No auth required to get markers near a point 
+    router.route('/api/markersByUser/')
+        .get(isBasicAuth, marker_api.getMarkersByUser);
+
     // Admin api
     router.route('/api/admin/marker-unapproved')
         .get(basicOrLocalAuth, isAdmin, marker_api.admin.markerUnapproved);

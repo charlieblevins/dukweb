@@ -478,6 +478,29 @@ module.exports = {
         });
     },
 
+    getMarkersByUser: function (req, res) {
+
+            // Make sure user is authorized to see/edit this marker
+            if (!req.user) {
+                return res.status(403).json({message: 'Unauthorized'});
+            }
+
+            // Update marker data
+            var query = Marker.find({'user_id': req.user._id}).select('approved');
+            
+            query.exec(function (err, markers) {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).json({message: 'An internal error occurred'});
+                }
+
+                if (!markers)
+                    return res.status(404).json({message: 'No markers found.'});
+
+                return res.status(200).json(markers);
+            }); // end update
+    },
+
     getMarkersWithin: function (req, res) {
 
         // Parse requested coords
