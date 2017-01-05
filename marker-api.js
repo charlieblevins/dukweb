@@ -497,10 +497,13 @@ module.exports = {
                 if (!markers)
                     return res.status(204).json({message: 'No markers found.'});
 
-                return res.status(200).json({
-                    message: 'markers found',
-		    markers: markers
-                });
+		// convert marker array to object keyed by id
+		var data = {};
+		markers.forEach(function (marker) {
+		    data[marker._id] = marker.approved
+		});
+
+                return res.status(200).json(data);
             }); // end update
     },
 
