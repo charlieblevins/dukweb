@@ -495,9 +495,12 @@ module.exports = {
                 }
 
                 if (!markers)
-                    return res.status(404).json({message: 'No markers found.'});
+                    return res.status(204).json({message: 'No markers found.'});
 
-                return res.status(200).json(markers);
+                return res.status(200).json({
+                    message: 'markers found',
+		    markers: markers
+                });
             }); // end update
     },
 
