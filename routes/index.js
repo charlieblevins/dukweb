@@ -175,9 +175,11 @@ module.exports = function (passport) {
         .post(isBasicAuth, marker_api.addMarker);
 
     router.route('/api/markers/')
-        .get(marker_api.getMarker)
         .put(isBasicAuth, marker_api.editMarker)
         .delete(isBasicAuth, marker_api.deleteMarker)
+
+    router.route('/api/getMarkersById')
+        .post(marker_api.getMarkers);
 
     // No auth required to get markers within a polygon
     router.route('/api/markersWithin/')

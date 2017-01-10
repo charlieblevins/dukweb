@@ -197,14 +197,22 @@ function handle_marker_data_failure () {
 /**
  * Returns Q promise
  */
-function get_marker_data (marker_id) {
-    var def = Q.defer();
+function get_marker_data (marker_ids) {
+    var def = Q.defer(),
+        obj_ids = [];
+
+    if (!marker_ids || !marker_ids.length) return false;
+
+    // Cast to ObjectId's
+    obj_ids = marker_ids.map((id) => {
+        return ObjectId(id);
+    });
 
     Marker
         .aggregate([
 
-            // Find marker by id
-            { "$match" : {'_id': ObjectId(marker_id) } },
+            // Find markers by id
+            { "$match" : {'_id': { '$in': obj_ids } } },
 
             // Join username from users collection
             { "$lookup" : { 
@@ -217,22 +225,23 @@ function get_marker_data (marker_id) {
             // Project (filter) only necessary fields
             { "$project" : {"createdDate" : 1, "tags" : 1, "photo_hash" : 1, "geometry" : 1, "user_info.username" : 1}}
         ])
-        .exec(function (err, marker) {
+        .exec(function (err, markers) {
             if (err)
                 return def.reject({'message': 'An internal error occurred', 'status': 500});
 
-            if (!marker || !marker[0])
-                return def.reject({'status': 404, message: 'No marker was found with id ' + marker_id});
+            if (!markers || !markers[0])
+                return def.reject({'status': 404, message: 'No markers found with ids: ' + obj_ids});
 
             // Build return data
-            returnData = marker[0];
+            returnData = markers;
+            returnData.forEach(function (marker) {
 
-            // Make joined username field a property of main object
-            if (returnData.user_info && returnData.user_info.length) {
-                returnData.username = returnData.user_info[0].username;
-            }
-
-            delete returnData.user_info;
+                // Make joined username field a property of main object
+                if (marker.user_info && marker.user_info.length) {
+                    marker.username = marker.user_info[0].username;
+                }
+                delete marker.user_info;
+            });
 
             def.resolve(returnData);
         });
@@ -242,29 +251,51 @@ function get_marker_data (marker_id) {
 
 /**
  * Get base 64 image data for a photo by it's id an size
- * @param size {string} - one of "full", "md", or "sm"
+ * @param markers {object} key ->
  */
-function get_photo_b64 (marker_id, size) {
+function get_photo_b64 (markers) {
     var def = Q.defer(),
+        size,
         size_suffix,
-        b64_data;
+        b64_data = {},
+        ids,
+        count,
+        total;
 
-    if (!marker_id) {
-        console.log('marker_id is required for get_photo_b64');
+        console.log('photo requests: ' + JSON.stringify(markers));
+
+    if (!markers) {
+        console.log('invalid data for get_photo_b64');
         return def.reject({'status': 500, 'message': 'An internal error occurred'});
     }
 
-    // If md or sm, use "_sm"/"_md" otherwise empty string
-    size_suffix = (size === 'md' || size === 'sm') ? '_' + size : '';
+    ids = Object.keys(markers);
+    count = 0;
+    total = ids.length;
+    ids.forEach((id) => {
+        console.log('getting img data for ' + id);
 
-    fs.readFile(appRoot + '/public/photos/' + marker_id + size_suffix + '.jpg', function (err, data_buffer) {
-        if (err) {
-            console.log(err);
-            return def.reject({'status': 500, 'message': 'An internal error occurred'});
-        }
+        size = markers[id];
 
-        b64_data = data_buffer.toString('base64');
-        def.resolve(b64_data);
+        // If md or sm, use "_sm"/"_md" otherwise empty string
+        size_suffix = (size === 'md' || size === 'sm') ? '_' + size : '';
+
+        fs.readFile(appRoot + '/public/photos/' + id + size_suffix + '.jpg', function (err, data_buffer) {
+            if (err) {
+                console.log(err);
+                return def.reject({'status': 500, 'message': 'An internal error occurred'});
+            }
+
+            // Insert data at original index
+            console.log('Received img data for ' + id);
+            b64_data[id] = data_buffer.toString('base64');
+
+            // resolve when all complete
+            if (++count === total) {
+                console.log('TOTAL reached: ' + total);
+                def.resolve(b64_data);
+            }
+        });
     });
 
     return def.promise;
@@ -339,18 +370,45 @@ module.exports = {
         return;
     },
 
-    getMarker: function (req, res) {
+    getMarkers: function (req, res) {
         var async_operations = [],
-            returnData;
+            marker_ids = [],
+            photo_requests = {},
+            returnData,
+            receivedData;
 
-        console.log('Get marker id: ' + req.query.marker_id);
+        console.log('Get markers...');
+
+        console.log(req.body.markers);
+
+        receivedData = req.body.markers;
+        if (!receivedData || !receivedData.length) {
+           return res.status(422).json({message: 'Invalid Data passed with request'}); 
+        }
+
+        // Make two separate arrays for data retrieval and photo retrieval
+        receivedData.forEach((marker) => {
+
+            if (marker.public_id) {
+                marker_ids.push(marker.public_id);
+
+                if (marker.photo_size) {
+                    photo_requests[marker.public_id] = marker.photo_size;
+                }
+            }
+        });
+
+        // No ids
+        if (!marker_ids.length) {
+           return res.status(422).json({message: 'Invalid Data passed with request'}); 
+        }
 
         // Get marker data
-        async_operations.push(get_marker_data(req.query.marker_id));
+        async_operations.push(get_marker_data(marker_ids));
 
         // Get image data (if requested)
-        if (req.query.photo) {
-            async_operations.push(get_photo_b64(req.query.marker_id, req.query.photo));
+        if (Object.keys(photo_requests).length) {
+            async_operations.push(get_photo_b64(photo_requests));
         }
 
         Q.all(async_operations)
@@ -358,18 +416,18 @@ module.exports = {
 
                 returnData = data;
 
-                console.log('Return data: ' + JSON.stringify(returnData, null, 4));
-
                 // Insert img_data if returned
-                if (img_data) {
-                    returnData.photo = {
-                        'data': img_data,
-                        'size': req.query.photo
-                    };
-                    console.log('Including b64 img data: ' + img_data.substring(0, 20));
-                }
+                returnData.forEach((marker) => {
+                    if (img_data[marker._id]) {
+                        marker.photo = {
+                            'data': img_data[marker._id],
+                            'size': photo_requests[marker._id] 
+                        };
+                        console.log('Including b64 img data: ' + marker.photo.data.substring(0, 20) + '...');
+                    }
+                });
 
-                res.json({
+                res.status(200).json({
                     message: 'found marker',
                     data: returnData
                 });
