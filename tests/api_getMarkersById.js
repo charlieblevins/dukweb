@@ -24,7 +24,10 @@ request.post(
     }},
     function(err, httpResponse, body) {
         console.log('RESPONSE');
-        console.log('httpResponse: ' + JSON.stringify(httpResponse));
-        console.log('body: ' + JSON.stringify(body));
+        //console.log('httpResponse: ' + JSON.stringify(httpResponse));
+        console.log('body: ' + JSON.stringify(body, function (key, val) {
+            if (val.length > 100) return 'TOO LARGE';
+            return val;
+        }));
     }
 );
