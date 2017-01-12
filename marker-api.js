@@ -223,7 +223,14 @@ function get_marker_data (marker_ids) {
             },
 
             // Project (filter) only necessary fields
-            { "$project" : {"createdDate" : 1, "tags" : 1, "photo_hash" : 1, "geometry" : 1, "user_info.username" : 1}}
+            { "$project" : {
+				"createdDate" : 1,
+				"tags" : 1,
+				"photo_hash" : 1,
+				"geometry" : 1,
+				"user_info.username" : 1,
+				"approved": 1
+	    	}}
         ])
         .exec(function (err, markers) {
             if (err)
