@@ -19,7 +19,7 @@ request.post(
     {json: {
         markers: [
             {public_id: "585ea58e9f3912d4037a5e0f", photo_size: "sm"},
-            {public_id: "585ea58e9f3912d4037a5e10", photo_size: "sm"}
+            {public_id: "585ea58e9f3912d4037a5e10", photo_size: ["sm", "md", "full"]}
         ]
     }},
     function(err, httpResponse, body) {
@@ -28,6 +28,6 @@ request.post(
         console.log('body: ' + JSON.stringify(body, function (key, val) {
             if (val.length > 100) return 'TOO LARGE';
             return val;
-        }));
+        }, 4));
     }
 );

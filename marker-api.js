@@ -255,12 +255,11 @@ function get_marker_data (marker_ids) {
  */
 function get_photo_b64 (markers) {
     var def = Q.defer(),
-        size,
+        sizes,
         size_suffix,
         b64_data = {},
-        ids,
-        count,
-        total;
+        reads = [],
+        ids;
 
         console.log('photo requests: ' + JSON.stringify(markers));
 
@@ -270,32 +269,48 @@ function get_photo_b64 (markers) {
     }
 
     ids = Object.keys(markers);
-    count = 0;
-    total = ids.length;
+
     ids.forEach((id) => {
         console.log('getting img data for ' + id);
 
-        size = markers[id];
+        sizes = markers[id];
 
-        // If md or sm, use "_sm"/"_md" otherwise empty string
-        size_suffix = (size === 'md' || size === 'sm') ? '_' + size : '';
+        // Return data
+        b64_data[id] = {};
 
-        fs.readFile(appRoot + '/public/photos/' + id + size_suffix + '.jpg', function (err, data_buffer) {
-            if (err) {
-                console.log(err);
-                return def.reject({'status': 500, 'message': 'An internal error occurred'});
-            }
+        // Make array if size is single string
+        if (!Array.isArray(sizes)) {
+            sizes = [sizes];
+        }
 
-            // Insert data at original index
-            console.log('Received img data for ' + id);
-            b64_data[id] = data_buffer.toString('base64');
+        // Loop over each size for this marker
+        sizes.forEach((size) => {
 
-            // resolve when all complete
-            if (++count === total) {
-                console.log('TOTAL reached: ' + total);
-                def.resolve(b64_data);
-            }
+            // Make and store promise for async read
+            var read = Q.defer();
+            reads.push(read.promise);
+
+            // If md or sm, use "_sm"/"_md" otherwise assume full size (empty string)
+            size_suffix = (size === 'md' || size === 'sm') ? '_' + size : '';
+
+            fs.readFile(appRoot + '/public/photos/' + id + size_suffix + '.jpg', function (err, data_buffer) {
+                if (err) {
+                    console.log(err);
+                    return def.reject({'status': 500, 'message': 'An internal error occurred'});
+                }
+
+                console.log('Received img data for ' + id + ' and size: ' + size);
+                b64_data[id][size] = data_buffer.toString('base64');
+
+                read.resolve();
+            });
+
         });
+    });
+
+    // All reads complete
+    Q.all(reads).then(() => {
+        def.resolve(b64_data);
     });
 
     return def.promise;
@@ -392,6 +407,7 @@ module.exports = {
             if (marker.public_id) {
                 marker_ids.push(marker.public_id);
 
+                // marker.photo_size is Array OR string
                 if (marker.photo_size) {
                     photo_requests[marker.public_id] = marker.photo_size;
                 }
@@ -417,14 +433,17 @@ module.exports = {
                 returnData = data;
 
                 // Insert img_data if returned
-                returnData.forEach((marker) => {
+                returnData = returnData.map((marker) => {
                     if (img_data[marker._id]) {
-                        marker.photo = {
-                            'data': img_data[marker._id],
-                            'size': photo_requests[marker._id] 
-                        };
-                        console.log('Including b64 img data: ' + marker.photo.data.substring(0, 20) + '...');
+                        marker.photos = {};
+                        
+                        // return data keyed by size
+                        for (var size in img_data[marker._id]) {
+                            marker.photos[size] = img_data[marker._id][size];
+                        }
+                        console.log('Including b64 img data: ' + Object.keys(marker.photos));
                     }
+                    return marker;
                 });
 
                 res.status(200).json({
