@@ -401,8 +401,6 @@ module.exports = {
 
         console.log('Get markers...');
 
-        console.log(req.body.markers);
-
         receivedData = req.body.markers;
         if (!receivedData || !receivedData.length) {
            return res.status(422).json({message: 'Invalid Data passed with request'}); 
@@ -465,8 +463,8 @@ module.exports = {
     },
 
     editMarker: function (req, res) {
-        var tags = req.query.tags,
-            marker_id = req.query.marker_id;
+        var tags = req.body.tags,
+            marker_id = req.body.marker_id;
 
         // Only tags are editable for now
         if (tags) {
