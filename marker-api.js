@@ -464,7 +464,7 @@ module.exports = {
 
     editMarker: function (req, res) {
         var tags = req.body.tags,
-            marker_id = req.body.marker_id;
+            marker_id = req.body.public_id;
 
         // Only tags are editable for now
         if (tags) {

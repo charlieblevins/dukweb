@@ -174,7 +174,7 @@ module.exports = function (passport) {
     router.route('/api/markers')
         .post(isBasicAuth, marker_api.addMarker);
 
-    router.route('/api/markers/')
+    router.route('/api/markers')
         .put(isBasicAuth, marker_api.editMarker)
         .delete(isBasicAuth, marker_api.deleteMarker)
 
