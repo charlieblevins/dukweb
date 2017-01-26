@@ -486,6 +486,10 @@ module.exports = {
 
                 // Update tags
                 marker.tags = tags;
+
+                // Any tag update must be reviewed. Set approved to "pending"/0
+                marker.approved = 0;
+
                 marker.save(function (err) {
                     if (err) {
                         res.json({message: 'An internal error occurred'});
@@ -493,7 +497,8 @@ module.exports = {
 
                     res.json({
                         message: marker._id + ' updated successfully',
-                        new_tags: marker.tags
+                        new_tags: marker.tags,
+                        approved: 0
                     });
                 });
             }); // end update
