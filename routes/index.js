@@ -120,6 +120,12 @@ module.exports = function (passport) {
             return res.redirect('/code-entry');
         }
 
+        // Set login headers
+        res.set({
+            'login_success': true,
+            'user_id': req.user._id
+        });
+
         var context = { user: req.user };
         context.message = req.flash('message');
 
@@ -146,6 +152,7 @@ module.exports = function (passport) {
 
     router.get('/signout', function(req, res) {
         req.logout();
+        res.set('logout_success', true);
         res.redirect('/');
     });
 
