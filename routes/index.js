@@ -153,7 +153,7 @@ module.exports = function (passport) {
     router.get('/signout', function(req, res) {
         req.logout();
         res.set('logout_success', true);
-        res.redirect('/');
+        res.render('logout');
     });
 
     router.get('/terms-of-service', function (req, res) {
