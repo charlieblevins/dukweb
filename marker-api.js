@@ -90,6 +90,14 @@ function validate_marker_post (fields, file, res) {
         return false;
     }
 
+    // Created date required
+    if (!fields.created) {
+        message = 'created date missing or invalid.';
+        console.log(message);
+        res.status(422).json({message: message});
+        return false;
+    }
+
     // Valid
     return true;
 }
@@ -143,6 +151,8 @@ function save_new_marker (data_array) {
 
     marker.photo_hash = files.photo.hash;
 
+    // Convert created date string as Date object 
+    marker.createdDate = new Date(fields.created);
 
     // save the marker 
     marker.save(function(err) {
