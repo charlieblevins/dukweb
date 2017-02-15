@@ -238,7 +238,7 @@ function get_marker_data (marker_ids) {
 				"tags" : 1,
 				"photo_hash" : 1,
 				"geometry" : 1,
-				"user_info.username" : 1,
+				"user_info._id" : 1,
 				"approved": 1
 	    	}}
         ])
@@ -255,7 +255,7 @@ function get_marker_data (marker_ids) {
 
                 // Make joined username field a property of main object
                 if (marker.user_info && marker.user_info.length) {
-                    marker.username = marker.user_info[0].username;
+                    marker.user_id = marker.user_info[0]._id;
                 }
                 delete marker.user_info;
             });
