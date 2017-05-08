@@ -37,7 +37,7 @@ function add_to_blacklist (nouns_arr) {
 
     console.log(banned);
 
-    IconBlacklist.collection.insert(banned, function (err, docs) {
+    IconBlacklist.collection.insert(banned, {ordered: false}, function (err, docs) {
         if (err) {
             if (err.code === 11000) {
                 console.log('duplicate. Try again without duplicate');
