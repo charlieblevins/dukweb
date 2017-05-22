@@ -6,8 +6,9 @@
 
 var app = require('../app');
 var debug = require('debug')('passport-mongo:server');
-var http = require('http');
 var config = require('../config.json');
+var fs = require('fs');
+var path = require('path');
 
 // Set environment
 process.env.PORT = config.port;
@@ -21,10 +22,19 @@ console.log('Using port: ' + port);
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Create server.
  */
+var server, redirectServer;
 
-var server = http.createServer(app);
+// https
+if (config.privateKey) {
+	server = httpsServer(app);
+	redirectServer = httpRedirectServer();
+
+// http
+} else {
+	server = httpServer(app);
+}
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -33,6 +43,44 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+/**
+ * Make http server
+ */
+function httpServer (app) {
+	var http = require('http');
+	return http.createServer(app);
+}
+
+// Redirect from http port 80 to https
+function httpRedirectServer () {
+	var http = require('http');
+	return http.createServer(function (req, res) {
+		res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+		res.end();
+	}).listen(80);
+}
+
+function httpsServer (app) {
+
+	var https = require('https');
+
+	var key = fs.readFileSync(dir(config.privateKey));
+	var certificate = fs.readFileSync(dir(config.certificate));
+	var ca = config.ca.map(function (crt) {
+		return fs.readFileSync(dir(crt));
+	});
+
+	return https.createServer({
+		key: key,
+		cert: certificate,
+		ca: ca
+	}, app);
+}
+
+function dir (file) {
+	return path.resolve(__dirname, file);
+}
 
 /**
  * Normalize a port into a number, string, or false.

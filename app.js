@@ -20,7 +20,7 @@ var mongoose = require('mongoose');
 // Fix for promise depracation warning
 mongoose.Promise = global.Promise;
 
-mongoose.connect(dbConfig.url);
+mongoose.connect(dbConfig.getURL());
 var db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'connection error:'));
