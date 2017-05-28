@@ -49,6 +49,7 @@
             show_tags(data.tags);
         } else {
             console.log('No icons since there are no tags');
+            clear();
         }
 
         // Map
@@ -81,6 +82,14 @@
         }
     }
 
+    function clear () {
+        load_img(null);
+        load_icons(null);
+        show_tags(null);
+
+        alert('No more markers');
+    }
+
     function load_img (id) {
         var img_node = document.getElementById('img');
         img_node.src = '/photos/' + id + '_md.jpg';
@@ -93,7 +102,9 @@
 
         icons_container.innerHTML = '';
         
-        if (!tags || !tags.length) return false;
+        if (!tags || !tags.length) {
+            return false;
+        }
 
         tags.forEach(function (tag) {
             var img = document.createElement('img');
@@ -105,6 +116,13 @@
     function show_tags(tags) {
         var tags_container = document.getElementById('tags'),
             tag_str;
+
+        if (!tags_container) {
+            alert('Error: could not find tags container');
+            return false;
+        }
+        
+        tags_container.innerHTML = '';
 
         if (!tags || !tags.length) return false;
         tag_str = tags.join(', ');
