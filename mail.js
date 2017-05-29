@@ -73,7 +73,7 @@ var DukMail = function () {
         }
 
         if (!code) {
-            var err = 'Error: email required';
+            var err = 'Error: code required';
 			console.log(err);
             def.reject(err);
 			return def.promise;
@@ -83,7 +83,7 @@ var DukMail = function () {
 		var email_content = {
 			'p1': 'Please enter the following code when signing in to your account:',
 			'code': code,
-			'sign-in-url': 'https://dukapp.io/sign-in',
+			'sign-in-url': 'https://dukapp.io',
 			'sign-in-link-text': 'Back to Sign-In'
 		};
 
