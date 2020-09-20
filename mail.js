@@ -9,7 +9,8 @@ var DukMail = function () {
     // Create transporter object (connection to mailgun)
     var auth = {
         auth: {
-            api_key: 'key-4febba6f076db49b2397c252d6a8dd34',
+            // TODO - replace with env var
+            api_key: '__KEY__',
             domain: 'mail.dukapp.io'
         }
     };
