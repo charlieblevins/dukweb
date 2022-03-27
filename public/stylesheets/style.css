@@ -124,11 +124,11 @@ input::-webkit-inner-spin-button {
 .signup-wall,
 .account-wall {
     margin-top: 20px;
-    padding: 0px;
+    padding: 0;
     background-color: #f7f7f7;
     text-align: center;
     border: 1px solid #dedede;
-    padding: 0 0 20px 0;
+    padding: 0 0 20px;
 }
 .login-title {
     color: #555;
@@ -145,11 +145,11 @@ p.error-message {
     padding: 0 10px;
 }
 .user-details {
-    padding: 10px 0 0 0;
+    padding: 10px 0 0;
     text-align: left;
 }
 .user-details .group {
-    padding: 0 0 10px 0;
+    padding: 0 0 10px;
 }
 .user-details .label {
     font-weight: 100;
@@ -159,11 +159,11 @@ p.error-message {
 }
 .account-footer {
     position: relative;
-    padding-top: 0px;
+    padding-top: 0;
 }
 .account-home .account-footer {
     text-align: center;
-    padding: 0px 10px 0 10px;
+    padding: 0 10px;
 }
 .account-footer a {
     display: inline-block;
@@ -174,7 +174,7 @@ form.form-help-message,
 form.form-change-pass,
 form.form-delete-account {
     text-align: left;
-    padding: 20px 20px 0 20px;
+    padding: 20px 20px 0;
 }
 input[name="confirm-check"] {
 }
